@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/events")
 @RequiredArgsConstructor
 public class EventController {
-    private final EventService eventService;
+    private final EventService service;
 
     @PostMapping
     public MessageResponseDto createEvent(@Valid @RequestBody CreateEventDto dto, @CurrentUserId Long userId) {
-        return eventService.createEvent(dto, userId);
+        return service.createEvent(dto, userId);
     }
 }

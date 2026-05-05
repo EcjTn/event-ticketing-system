@@ -20,18 +20,18 @@ import java.util.List;
 public class EventService {
     private final EventRepository eventRepository;
     private final EventTierRepository eventTierRepository;
-    private final EventMapper eventMapper;
+    private final EventMapper mapper;
 
     @Transactional
     public MessageResponseDto createEvent(CreateEventDto dto, Long createdBy) {
-        Event event = eventMapper.toEvent(dto);
+        Event event = mapper.toEvent(dto);
         event.setCreatedBy(createdBy);
         //event.setStatus(EventStatus.DRAFT); --- this is the default
 
         Event savedEvent = eventRepository.save(event);
 
         List<EventTier> tiers = dto.tiers().stream()
-                .map(eventMapper::toEventTier)
+                .map(mapper::toEventTier)
                 .peek(tier -> tier.setEvent(savedEvent))
                 .toList();
 

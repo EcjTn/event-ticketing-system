@@ -37,7 +37,7 @@ function Login() {
         return
       }
 
-      navigate('/')
+      navigate('/events')
     } catch (err) {
       setError('Unable to connect to the server. Please try again.')
     } finally {

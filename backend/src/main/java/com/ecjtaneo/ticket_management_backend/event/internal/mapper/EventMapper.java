@@ -2,24 +2,19 @@ package com.ecjtaneo.ticket_management_backend.event.internal.mapper;
 
 import com.ecjtaneo.ticket_management_backend.event.internal.dto.CreateEventDto;
 import com.ecjtaneo.ticket_management_backend.event.internal.dto.CreateEventTierDto;
+import com.ecjtaneo.ticket_management_backend.event.internal.dto.EventBasicInfoDto;
+import com.ecjtaneo.ticket_management_backend.event.internal.dto.EventInfoDto;
 import com.ecjtaneo.ticket_management_backend.event.internal.model.Event;
 import com.ecjtaneo.ticket_management_backend.event.internal.model.EventTier;
+
+import java.util.List;
+
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface EventMapper {
-
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "status", ignore = true)
-    @Mapping(target = "createdBy", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "tiers", ignore = true)
     Event toEvent(CreateEventDto dto);
-
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "event", ignore = true)
-    @Mapping(target = "soldCount", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
     EventTier toEventTier(CreateEventTierDto dto);
+    List<EventBasicInfoDto> toEventBasicInfoDtoList(List<Event> event);
+    EventInfoDto toEventInfoDto(Event event);
 }

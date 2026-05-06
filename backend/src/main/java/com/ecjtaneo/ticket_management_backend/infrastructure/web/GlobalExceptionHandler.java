@@ -6,9 +6,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import com.ecjtaneo.ticket_management_backend.shared.ResourceConflictException;
-import com.ecjtaneo.ticket_management_backend.shared.ResourceNotFoundException;
-import com.ecjtaneo.ticket_management_backend.shared.ValidationException;
+import com.ecjtaneo.ticket_management_backend.shared.exceptions.ResourceConflictException;
+import com.ecjtaneo.ticket_management_backend.shared.exceptions.ResourceNotFoundException;
+import com.ecjtaneo.ticket_management_backend.shared.exceptions.ValidationException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {

@@ -1,5 +1,6 @@
 package com.ecjtaneo.ticket_management_backend.event.internal;
 
+import com.ecjtaneo.ticket_management_backend.event.EventApi;
 import com.ecjtaneo.ticket_management_backend.event.EventTierBasicInfo;
 import com.ecjtaneo.ticket_management_backend.event.internal.dto.CreateEventRequestDto;
 import com.ecjtaneo.ticket_management_backend.event.internal.dto.EventBasicInfoResponseDto;
@@ -24,7 +25,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class EventService {
+public class EventService implements EventApi {
     private final EventRepository eventRepository;
     private final EventTierRepository eventTierRepository;
     private final EventMapper mapper;

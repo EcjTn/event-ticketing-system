@@ -19,7 +19,7 @@ public class EventController {
     private final EventService service;
 
     @GetMapping("/{id}")
-    public List<EventInfoResponseDto> getEventInfoById(@PathVariable Long id) {
+    public EventInfoResponseDto getEventInfoById(@PathVariable Long id) {
         return service.getEventInfoById(id);
     }
 

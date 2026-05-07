@@ -39,7 +39,7 @@ public class EventService {
         );
     }
 
-    public List<EventInfoResponseDto> getEventInfoById(Long id) {
+    public EventInfoResponseDto getEventInfoById(Long id) {
         Event event = eventRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Event not found with id: " + id));
         
@@ -48,19 +48,10 @@ public class EventService {
         Integer totalAvailableTickets = event.getTiers().stream()
             .mapToInt(tier -> tier.getQuantity() - tier.getSoldCount())
             .sum();
-        
-        return List.of(new EventInfoResponseDto(
-            eventInfoResponseDto.id(),
-            eventInfoResponseDto.name(),
-            eventInfoResponseDto.date(),
-            eventInfoResponseDto.venue(),
-            eventInfoResponseDto.description(),
-            eventInfoResponseDto.imageUrl(),
-            eventInfoResponseDto.status(),
-            eventInfoResponseDto.createdAt(),
-            eventInfoResponseDto.tiers(),
-            totalAvailableTickets
-        ));
+
+        eventInfoResponseDto.setAvailableTickets(totalAvailableTickets);
+
+        return eventInfoResponseDto;
     }
 
     @Transactional

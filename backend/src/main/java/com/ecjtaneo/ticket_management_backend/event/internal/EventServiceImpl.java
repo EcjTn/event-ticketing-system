@@ -1,5 +1,6 @@
 package com.ecjtaneo.ticket_management_backend.event.internal;
 
+import com.ecjtaneo.ticket_management_backend.event.EventTierBasicInfo;
 import com.ecjtaneo.ticket_management_backend.event.internal.dto.CreateEventRequestDto;
 import com.ecjtaneo.ticket_management_backend.event.internal.dto.EventBasicInfoResponseDto;
 import com.ecjtaneo.ticket_management_backend.event.internal.dto.EventInfoResponseDto;
@@ -12,16 +13,18 @@ import com.ecjtaneo.ticket_management_backend.event.internal.repository.EventTie
 import com.ecjtaneo.ticket_management_backend.shared.dtos.MessageResponseDto;
 import com.ecjtaneo.ticket_management_backend.shared.exceptions.ResourceNotFoundException;
 
+import com.ecjtaneo.ticket_management_backend.shared.exceptions.ValidationException;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class EventService {
+public class EventServiceImpl {
     private final EventRepository eventRepository;
     private final EventTierRepository eventTierRepository;
     private final EventMapper mapper;
@@ -71,4 +74,33 @@ public class EventService {
 
         return new MessageResponseDto("Event created successfully");
     }
+
+
+
+    // For validation/existence checks (public)
+
+    public void validateEventIsPublished(Long id) {
+        Event event = eventRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Event not found"));
+
+        if(event.getStatus() != EventStatus.PUBLISHED) throw new ValidationException("Event is not available");
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY)
+    public EventTierBasicInfo getEventTierInfo(Long id) {
+        // Pessimistic Lock the event tier for update to prevent race conditions
+        // Lock is released when the caller's transaction ends, since we use Propagation.MANDATORY
+        EventTier eventTier = eventTierRepository.findByIdAndAvailable(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Event tier not found"));
+
+        return mapper.toEventTierBasicInfo(eventTier);
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void incrementEventTierSoldCount(Long tierId, int quantity) {
+        EventTier eventTier = eventTierRepository.findById(tierId)
+                .orElseThrow(() -> new ResourceNotFoundException("Event tier not found"));
+        eventTier.setSoldCount(eventTier.getSoldCount() + quantity);
+    }
+
 }

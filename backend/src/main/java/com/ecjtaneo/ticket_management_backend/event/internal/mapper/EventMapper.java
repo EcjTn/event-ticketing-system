@@ -1,5 +1,6 @@
 package com.ecjtaneo.ticket_management_backend.event.internal.mapper;
 
+import com.ecjtaneo.ticket_management_backend.event.EventTierBasicInfo;
 import com.ecjtaneo.ticket_management_backend.event.internal.dto.CreateEventRequestDto;
 import com.ecjtaneo.ticket_management_backend.event.internal.dto.CreateEventTierRequestDto;
 import com.ecjtaneo.ticket_management_backend.event.internal.dto.EventBasicInfoResponseDto;
@@ -17,4 +18,5 @@ public interface EventMapper {
     EventTier toEventTier(CreateEventTierRequestDto dto);
     List<EventBasicInfoResponseDto> toEventBasicInfoDtoList(List<Event> event);
     EventInfoResponseDto toEventInfoDto(Event event);
+    EventTierBasicInfo toEventTierBasicInfo(EventTier eventTier);
 }

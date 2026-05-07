@@ -1,8 +1,8 @@
 package com.ecjtaneo.ticket_management_backend.event.internal;
 
-import com.ecjtaneo.ticket_management_backend.event.internal.dto.CreateEventDto;
-import com.ecjtaneo.ticket_management_backend.event.internal.dto.EventBasicInfoDto;
-import com.ecjtaneo.ticket_management_backend.event.internal.dto.EventInfoDto;
+import com.ecjtaneo.ticket_management_backend.event.internal.dto.CreateEventRequestDto;
+import com.ecjtaneo.ticket_management_backend.event.internal.dto.EventBasicInfoResponseDto;
+import com.ecjtaneo.ticket_management_backend.event.internal.dto.EventInfoResponseDto;
 import com.ecjtaneo.ticket_management_backend.event.internal.mapper.EventMapper;
 import com.ecjtaneo.ticket_management_backend.event.internal.model.Event;
 import com.ecjtaneo.ticket_management_backend.event.internal.model.EventStatus;
@@ -27,44 +27,44 @@ public class EventService {
     private final EventMapper mapper;
 
 
-    public List<EventBasicInfoDto> getEvents() {
+    public List<EventBasicInfoResponseDto> getEvents() {
         return mapper.toEventBasicInfoDtoList(
             eventRepository.findTop10ByStatusOrderByIdDesc(EventStatus.PUBLISHED)
         );
     }
 
-    public List<EventBasicInfoDto> getEvents(Long lastSeenId) {
+    public List<EventBasicInfoResponseDto> getEvents(Long lastSeenId) {
         return mapper.toEventBasicInfoDtoList(
             eventRepository.findTop10ByIdLessThanOrderByIdDesc(lastSeenId)
         );
     }
 
-    public List<EventInfoDto> getEventInfoById(Long id) {
+    public List<EventInfoResponseDto> getEventInfoById(Long id) {
         Event event = eventRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Event not found with id: " + id));
         
-        EventInfoDto eventInfoDto = mapper.toEventInfoDto(event);
+        EventInfoResponseDto eventInfoResponseDto = mapper.toEventInfoDto(event);
         
         Integer totalAvailableTickets = event.getTiers().stream()
             .mapToInt(tier -> tier.getQuantity() - tier.getSoldCount())
             .sum();
         
-        return List.of(new EventInfoDto(
-            eventInfoDto.id(),
-            eventInfoDto.name(),
-            eventInfoDto.date(),
-            eventInfoDto.venue(),
-            eventInfoDto.description(),
-            eventInfoDto.imageUrl(),
-            eventInfoDto.status(),
-            eventInfoDto.createdAt(),
-            eventInfoDto.tiers(),
+        return List.of(new EventInfoResponseDto(
+            eventInfoResponseDto.id(),
+            eventInfoResponseDto.name(),
+            eventInfoResponseDto.date(),
+            eventInfoResponseDto.venue(),
+            eventInfoResponseDto.description(),
+            eventInfoResponseDto.imageUrl(),
+            eventInfoResponseDto.status(),
+            eventInfoResponseDto.createdAt(),
+            eventInfoResponseDto.tiers(),
             totalAvailableTickets
         ));
     }
 
     @Transactional
-    public MessageResponseDto createEvent(CreateEventDto dto, Long createdBy) {
+    public MessageResponseDto createEvent(CreateEventRequestDto dto, Long createdBy) {
         Event event = mapper.toEvent(dto);
         event.setCreatedBy(createdBy);
         //event.setStatus(EventStatus.DRAFT); --- this is the default

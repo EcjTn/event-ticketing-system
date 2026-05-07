@@ -4,7 +4,7 @@ import com.ecjtaneo.ticket_management_backend.event.internal.model.EventStatus;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public record EventInfoDto(
+public record EventInfoResponseDto(
     Long id,
     String name,
     LocalDateTime date,
@@ -13,7 +13,7 @@ public record EventInfoDto(
     String imageUrl,
     EventStatus status,
     LocalDateTime createdAt,
-    List<EventTierInfoDto> tiers,
+    List<EventTierInfoResponseDto> tiers,
     Integer availableTickets
 ) {
     

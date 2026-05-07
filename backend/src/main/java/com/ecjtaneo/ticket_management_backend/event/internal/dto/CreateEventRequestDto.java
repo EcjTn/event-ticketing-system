@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public record CreateEventDto(
+public record CreateEventRequestDto(
     @NotBlank(message = "Event name is required")
     @Size(max = 255, message = "Event name must not exceed 255 characters")
     String name,
@@ -27,5 +27,5 @@ public record CreateEventDto(
     @NotNull(message = "Event tiers are required")
     @Size(min = 1, message = "At least one event tier is required")
     @Valid
-    List<CreateEventTierDto> tiers
+    List<CreateEventTierRequestDto> tiers
 ) {}

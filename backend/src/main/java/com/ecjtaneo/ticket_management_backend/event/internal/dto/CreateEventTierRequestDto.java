@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
-public record CreateEventTierDto(
+public record CreateEventTierRequestDto(
     @NotNull(message = "Tier is required")
     TicketTier tier,
 

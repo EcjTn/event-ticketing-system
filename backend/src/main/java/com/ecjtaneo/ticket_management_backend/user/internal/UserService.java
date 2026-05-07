@@ -10,7 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.ecjtaneo.ticket_management_backend.shared.dtos.MessageResponseDto;
 import com.ecjtaneo.ticket_management_backend.shared.exceptions.ResourceNotFoundException;
 import com.ecjtaneo.ticket_management_backend.storage.StorageService;
-import com.ecjtaneo.ticket_management_backend.user.UserService;
+import com.ecjtaneo.ticket_management_backend.user.UserApi;
 import com.ecjtaneo.ticket_management_backend.user.internal.dto.UserInfoResponseDto;
 import com.ecjtaneo.ticket_management_backend.user.internal.mapper.UserMapper;
 import com.ecjtaneo.ticket_management_backend.user.internal.model.User;
@@ -19,7 +19,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService {
+public class UserService implements UserApi {
     private final UserRepository repository;
     private final UserMapper mapper;
     private final StorageService storageService;

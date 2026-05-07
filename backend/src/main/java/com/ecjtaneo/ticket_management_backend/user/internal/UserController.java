@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/users")
 @RequiredArgsConstructor
 public class UserController {
-    private final UserServiceImpl service;
+    private final UserService service;
 
     @GetMapping("/me")
     public UserInfoResponseDto getUserInfo(@CurrentUserId Long userId) {

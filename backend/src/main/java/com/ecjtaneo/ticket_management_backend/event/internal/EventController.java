@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/events")
 @RequiredArgsConstructor
 public class EventController {
-    private final EventServiceImpl service;
+    private final EventService service;
 
     @GetMapping("/{id}")
     public EventInfoResponseDto getEventInfoById(@PathVariable Long id) {

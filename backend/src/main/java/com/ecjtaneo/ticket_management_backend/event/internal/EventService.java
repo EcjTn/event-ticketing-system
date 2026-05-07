@@ -24,7 +24,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class EventServiceImpl {
+public class EventService {
     private final EventRepository eventRepository;
     private final EventTierRepository eventTierRepository;
     private final EventMapper mapper;

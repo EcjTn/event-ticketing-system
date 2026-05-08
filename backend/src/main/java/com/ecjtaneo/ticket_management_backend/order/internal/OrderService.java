@@ -12,6 +12,7 @@ import com.ecjtaneo.ticket_management_backend.event.EventTierBasicInfo;
 import com.ecjtaneo.ticket_management_backend.order.internal.dto.CreateOrderRequestDto;
 import com.ecjtaneo.ticket_management_backend.order.internal.dto.OrderInfoResponseDto;
 import com.ecjtaneo.ticket_management_backend.order.internal.dto.OrderItemRequestDto;
+import com.ecjtaneo.ticket_management_backend.order.internal.mapper.OrderMapper;
 import com.ecjtaneo.ticket_management_backend.order.internal.model.Order;
 import com.ecjtaneo.ticket_management_backend.order.internal.model.OrderItem;
 import com.ecjtaneo.ticket_management_backend.order.internal.repository.OrderItemRepository;
@@ -26,10 +27,11 @@ import lombok.RequiredArgsConstructor;
 public class OrderService {
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
+    private final OrderMapper mapper;
     private final EventApi eventApi;
     private final LocalDateTime orderExpiresAt = LocalDateTime.now().plusMinutes(15);
 
-    // TODO: Make a Mapper for the response
+    // TODO: emit application event after order creation
     // TODO: Separate order creation logic for readability
     @Transactional
     public OrderInfoResponseDto createOrder(CreateOrderRequestDto request, Long userId) {
@@ -75,7 +77,7 @@ public class OrderService {
         // Lock is still held here(event tier transaction is MANDATORY)
         orderItems.forEach(item -> eventApi.incrementEventTierSoldCount(item.getEventTierId(), item.getQuantity()));
 
-        return null;
+        return mapper.toOrderInfoResponseDto(order);
     }
 
 }

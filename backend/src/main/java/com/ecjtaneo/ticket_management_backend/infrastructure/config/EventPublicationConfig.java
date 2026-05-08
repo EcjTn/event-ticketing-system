@@ -15,12 +15,12 @@ public class EventPublicationConfig {
     private final IncompleteEventPublications incompleteEventPublications;
     private final CompletedEventPublications completedEventPublications;
 
-    @Scheduled(fixedDelay = Duration.ofMinutes(5).toMillis())
+    @Scheduled(fixedDelay = 5 * 60_000)
     public void resubmitIncompleteEvents() {
         incompleteEventPublications.resubmitIncompletePublicationsOlderThan(Duration.ofMinutes(1));
     }
 
-    @@Scheduled(fixedDelay = Duration.ofHours(24).toMillis())
+    @Scheduled(fixedDelay = 86_400_000) // every 24 hours
     public void clearCompletedPublications() {
         completedEventPublications.deletePublicationsOlderThan(Duration.ofDays(7));
     }

@@ -7,4 +7,5 @@ still in development.
 - PostgreSQL
 - Flyway
 - Spring Modulith
-- Cloudinary 
+- Cloudinary
+- Apache Tika

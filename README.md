@@ -1,6 +1,6 @@
 # Event Ticketing Management System 
 
-still being in development.
+still in development.
 
 - Spring Boot
 - ReactJS

@@ -80,6 +80,7 @@ public class EventService implements EventApi {
 
     // For validation/existence checks (public)
 
+    @Override
     public void validateEventIsPublished(Long id) {
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found"));
@@ -87,6 +88,7 @@ public class EventService implements EventApi {
         if(event.getStatus() != EventStatus.PUBLISHED) throw new ValidationException("Event is not available");
     }
 
+    @Override
     @Transactional(propagation = Propagation.MANDATORY)
     public EventTierBasicInfo getEventTierInfo(Long id) {
         // Pessimistic Lock the event tier for update to prevent race conditions
@@ -97,6 +99,7 @@ public class EventService implements EventApi {
         return mapper.toEventTierBasicInfo(eventTier);
     }
 
+    @Override
     @Transactional(propagation = Propagation.MANDATORY)
     public void incrementEventTierSoldCount(Long tierId, int quantity) {
         EventTier eventTier = eventTierRepository.findById(tierId)

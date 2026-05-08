@@ -3,9 +3,10 @@
 still in development.
 
 - Spring Boot
-- ReactJS
+- Spring Security
+- Spring Modulith 
+- ReactJS & Tailwind CSS
 - PostgreSQL
 - Flyway
-- Spring Modulith
 - Cloudinary
 - Apache Tika

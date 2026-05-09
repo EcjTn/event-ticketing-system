@@ -13,7 +13,7 @@ import java.util.List;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/events")
+@RequestMapping("/events")
 @RequiredArgsConstructor
 public class EventController {
     private final EventService service;
@@ -25,10 +25,10 @@ public class EventController {
 
     @GetMapping
     public List<EventBasicInfoResponseDto> getEvents(@RequestParam(name = "cursor", required = false) Long lastSeenId) {
-        if(lastSeenId == null) return service.getEvents();
+        if (lastSeenId == null)
+            return service.getEvents();
         return service.getEvents(lastSeenId);
     }
-
 
     @PostMapping
     public MessageResponseDto createEvent(@Valid @RequestBody CreateEventRequestDto dto, @CurrentUserId Long userId) {

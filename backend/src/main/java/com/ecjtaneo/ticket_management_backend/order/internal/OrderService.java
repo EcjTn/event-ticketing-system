@@ -74,7 +74,7 @@ public class OrderService {
         orderItems.forEach(item -> item.setOrder(order));
         orderItemRepository.saveAll(orderItems);
 
-        // Lock is still held here(event tier transaction is MANDATORY)
+    
         orderItems.forEach(item -> eventApi.incrementEventTierSoldCount(item.getEventTierId(), item.getQuantity()));
 
         return mapper.toOrderInfoResponseDto(order);

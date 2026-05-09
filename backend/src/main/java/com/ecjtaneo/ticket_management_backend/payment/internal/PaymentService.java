@@ -13,11 +13,12 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class PaymentService {
+    private final PaymentRepository paymentRepository;
     private final ApplicationEventPublisher eventPublisher;
 
     @ApplicationModuleListener()
     public void processOrderCreation(OrderCreatedEvent event) {
-
+        // TODO: add payment entity record with repository
         // Just for demo: simulate a random payment success/failure
         boolean shouldFail = true;
 

@@ -16,8 +16,10 @@ import com.ecjtaneo.ticket_management_backend.order.internal.dto.OrderItemReques
 import com.ecjtaneo.ticket_management_backend.order.internal.mapper.OrderMapper;
 import com.ecjtaneo.ticket_management_backend.order.internal.model.Order;
 import com.ecjtaneo.ticket_management_backend.order.internal.model.OrderItem;
+import com.ecjtaneo.ticket_management_backend.order.internal.model.OrderStatus;
 import com.ecjtaneo.ticket_management_backend.order.internal.repository.OrderItemRepository;
 import com.ecjtaneo.ticket_management_backend.order.internal.repository.OrderRepository;
+import com.ecjtaneo.ticket_management_backend.shared.dtos.MessageResponseDto;
 import com.ecjtaneo.ticket_management_backend.shared.events.OrderCreatedEvent;
 import com.ecjtaneo.ticket_management_backend.shared.exceptions.ValidationException;
 
@@ -91,6 +93,25 @@ public class OrderService {
 
     private void updateEventTierCounts(List<OrderItem> orderItems) {
         orderItems.forEach(item -> eventApi.incrementEventTierSoldCount(item.getEventTierId(), item.getQuantity()));
+    }
+
+    public boolean canCancelOrder(Long orderId, Long userId) {
+        return orderRepository.existsByIdAndUserId(orderId, userId);
+    }
+
+    @Transactional
+    public MessageResponseDto cancelOrder(Long orderId) {
+        Order order = orderRepository.findByIdAndStatus(orderId, OrderStatus.PENDING)
+                .orElseThrow(() -> new ValidationException("Order not found or already cancelled"));
+
+        order.setStatus(OrderStatus.CANCELLED);
+        revertEventTierCounts(order.getItems());
+
+        return new MessageResponseDto("Order cancelled successfully");
+    }
+
+    private void revertEventTierCounts(List<OrderItem> orderItems) {
+        orderItems.forEach(item -> eventApi.decrementEventTierSoldCount(item.getEventTierId(), item.getQuantity()));
     }
 
 }

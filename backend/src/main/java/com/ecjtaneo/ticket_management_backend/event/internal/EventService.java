@@ -101,4 +101,12 @@ public class EventService implements EventApi {
                 eventTier.setSoldCount(eventTier.getSoldCount() + quantity);
         }
 
+        @Override
+        @Transactional
+        public void decrementEventTierSoldCount(Long tierId, int quantity) {
+                EventTier eventTier = eventTierRepository.findByIdForUpdate(tierId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Event tier not found"));
+                eventTier.setSoldCount(eventTier.getSoldCount() - quantity);
+        }
+
 }

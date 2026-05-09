@@ -14,4 +14,8 @@ public interface EventTierRepository extends JpaRepository<EventTier, Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT e FROM EventTier e WHERE e.id = :id AND (e.quantity > e.soldCount)")
     public Optional<EventTier> findByIdAndAvailable(@Param("id") Long id);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT e FROM EventTier e WHERE e.id = :id")
+    public Optional<EventTier> findByIdForUpdate(@Param("id") Long id);
 }

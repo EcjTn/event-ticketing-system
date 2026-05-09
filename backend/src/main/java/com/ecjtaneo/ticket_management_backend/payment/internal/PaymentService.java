@@ -20,7 +20,7 @@ public class PaymentService {
     public void processOrderCreation(OrderCreatedEvent event) {
         // TODO: add payment entity record with repository
         // Just for demo: simulate a random payment success/failure
-        boolean shouldFail = true;
+        boolean shouldFail = false;
 
         if (shouldFail) {
             eventPublisher.publishEvent(new PaymentFailedEvent(event.orderId()));

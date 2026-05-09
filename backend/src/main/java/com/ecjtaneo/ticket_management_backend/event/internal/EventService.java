@@ -18,7 +18,6 @@ import com.ecjtaneo.ticket_management_backend.shared.exceptions.ValidationExcept
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -26,85 +25,81 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class EventService implements EventApi {
-    private final EventRepository eventRepository;
-    private final EventTierRepository eventTierRepository;
-    private final EventMapper mapper;
+        private final EventRepository eventRepository;
+        private final EventTierRepository eventTierRepository;
+        private final EventMapper mapper;
 
+        public List<EventBasicInfoResponseDto> getEvents() {
+                return mapper.toEventBasicInfoDtoList(
+                                eventRepository.findTop10ByStatusOrderByIdDesc(EventStatus.PUBLISHED));
+        }
 
-    public List<EventBasicInfoResponseDto> getEvents() {
-        return mapper.toEventBasicInfoDtoList(
-            eventRepository.findTop10ByStatusOrderByIdDesc(EventStatus.PUBLISHED)
-        );
-    }
+        public List<EventBasicInfoResponseDto> getEvents(Long lastSeenId) {
+                return mapper.toEventBasicInfoDtoList(
+                                eventRepository.findTop10ByIdLessThanOrderByIdDesc(lastSeenId));
+        }
 
-    public List<EventBasicInfoResponseDto> getEvents(Long lastSeenId) {
-        return mapper.toEventBasicInfoDtoList(
-            eventRepository.findTop10ByIdLessThanOrderByIdDesc(lastSeenId)
-        );
-    }
+        public EventInfoResponseDto getEventInfoById(Long id) {
+                Event event = eventRepository.findById(id)
+                                .orElseThrow(() -> new ResourceNotFoundException("Event not found with id: " + id));
 
-    public EventInfoResponseDto getEventInfoById(Long id) {
-        Event event = eventRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Event not found with id: " + id));
-        
-        EventInfoResponseDto eventInfoResponseDto = mapper.toEventInfoDto(event);
-        
-        Integer totalAvailableTickets = event.getTiers().stream()
-            .mapToInt(tier -> tier.getQuantity() - tier.getSoldCount())
-            .sum();
+                EventInfoResponseDto eventInfoResponseDto = mapper.toEventInfoDto(event);
 
-        eventInfoResponseDto.setAvailableTickets(totalAvailableTickets);
+                Integer totalAvailableTickets = event.getTiers().stream()
+                                .mapToInt(tier -> tier.getQuantity() - tier.getSoldCount())
+                                .sum();
 
-        return eventInfoResponseDto;
-    }
+                eventInfoResponseDto.setAvailableTickets(totalAvailableTickets);
 
-    @Transactional
-    public MessageResponseDto createEvent(CreateEventRequestDto dto, Long createdBy) {
-        Event event = mapper.toEvent(dto);
-        event.setCreatedBy(createdBy);
-        //event.setStatus(EventStatus.DRAFT); --- this is the default
+                return eventInfoResponseDto;
+        }
 
-        Event savedEvent = eventRepository.save(event);
+        @Transactional
+        public MessageResponseDto createEvent(CreateEventRequestDto dto, Long createdBy) {
+                Event event = mapper.toEvent(dto);
+                event.setCreatedBy(createdBy);
+                // event.setStatus(EventStatus.DRAFT); --- this is the default
 
-        List<EventTier> tiers = dto.tiers().stream()
-                .map(mapper::toEventTier)
-                .peek(tier -> tier.setEvent(savedEvent))
-                .toList();
+                Event savedEvent = eventRepository.save(event);
 
-        eventTierRepository.saveAll(tiers);
+                List<EventTier> tiers = dto.tiers().stream()
+                                .map(mapper::toEventTier)
+                                .peek(tier -> tier.setEvent(savedEvent))
+                                .toList();
 
-        return new MessageResponseDto("Event created successfully");
-    }
+                eventTierRepository.saveAll(tiers);
 
+                return new MessageResponseDto("Event created successfully");
+        }
 
+        // For validation/existence checks (public)
 
-    // For validation/existence checks (public)
+        @Override
+        public void validateEventIsPublished(Long id) {
+                Event event = eventRepository.findById(id)
+                                .orElseThrow(() -> new ResourceNotFoundException("Event not found"));
 
-    @Override
-    public void validateEventIsPublished(Long id) {
-        Event event = eventRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Event not found"));
+                if (event.getStatus() != EventStatus.PUBLISHED)
+                        throw new ValidationException("Event is not available");
+        }
 
-        if(event.getStatus() != EventStatus.PUBLISHED) throw new ValidationException("Event is not available");
-    }
+        @Override
+        @Transactional
+        public EventTierBasicInfo getEventTierInfo(Long id) {
+                // Pessimistic Lock the event tier for update to prevent race conditions
+                // Lock is released when the caller's transaction ends (order service)
+                EventTier eventTier = eventTierRepository.findByIdAndAvailable(id)
+                                .orElseThrow(() -> new ResourceNotFoundException("Event tier not found"));
 
-    @Override
-    @Transactional
-    public EventTierBasicInfo getEventTierInfo(Long id) {
-        // Pessimistic Lock the event tier for update to prevent race conditions
-        // Lock is released when the caller's transaction ends (order service)
-        EventTier eventTier = eventTierRepository.findByIdAndAvailable(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Event tier not found"));
+                return mapper.toEventTierBasicInfo(eventTier);
+        }
 
-        return mapper.toEventTierBasicInfo(eventTier);
-    }
-
-    @Override
-    @Transactional
-    public void incrementEventTierSoldCount(Long tierId, int quantity) {
-        EventTier eventTier = eventTierRepository.findById(tierId)
-                .orElseThrow(() -> new ResourceNotFoundException("Event tier not found"));
-        eventTier.setSoldCount(eventTier.getSoldCount() + quantity);
-    }
+        @Override
+        @Transactional
+        public void incrementEventTierSoldCount(Long tierId, int quantity) {
+                EventTier eventTier = eventTierRepository.findById(tierId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Event tier not found"));
+                eventTier.setSoldCount(eventTier.getSoldCount() + quantity);
+        }
 
 }

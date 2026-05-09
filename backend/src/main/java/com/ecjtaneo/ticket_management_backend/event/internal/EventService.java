@@ -89,10 +89,10 @@ public class EventService implements EventApi {
     }
 
     @Override
-    @Transactional(propagation = Propagation.MANDATORY)
+    @Transactional
     public EventTierBasicInfo getEventTierInfo(Long id) {
         // Pessimistic Lock the event tier for update to prevent race conditions
-        // Lock is released when the caller's transaction ends, since we use Propagation.MANDATORY
+        // Lock is released when the caller's transaction ends (order service)
         EventTier eventTier = eventTierRepository.findByIdAndAvailable(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Event tier not found"));
 
@@ -100,7 +100,7 @@ public class EventService implements EventApi {
     }
 
     @Override
-    @Transactional(propagation = Propagation.MANDATORY)
+    @Transactional
     public void incrementEventTierSoldCount(Long tierId, int quantity) {
         EventTier eventTier = eventTierRepository.findById(tierId)
                 .orElseThrow(() -> new ResourceNotFoundException("Event tier not found"));

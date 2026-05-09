@@ -40,7 +40,7 @@ public class Order {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    @OneToMany(mappedBy = "order", fetch = FetchType.EAGER) //Intentionally EAGER since theres only 3 items max per order
+    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY) // Changed from EAGER to LAZY
     private List<OrderItem> items;
 
 }

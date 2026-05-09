@@ -24,25 +24,30 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) {
         return http
-            .cors(Customizer.withDefaults())
-            .csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
+                .cors(Customizer.withDefaults())
+                .csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
 
-            .formLogin(l -> l
-                .loginProcessingUrl("/auth/login")
-                .successHandler((request, response, authentication) -> { response.setStatus(HttpServletResponse.SC_OK); })
-                .failureHandler((request, response, authentication) -> { response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); })
-            )
-            .logout(l -> l
-                .logoutUrl("/auth/logout")
-                .logoutSuccessHandler((request, response, authentication) -> { response.setStatus(HttpServletResponse.SC_OK); })
-                .logoutSuccessHandler((request, response, authentication) -> { response.setStatus(HttpServletResponse.SC_OK); }))
+                .formLogin(l -> l
+                        .loginProcessingUrl("/auth/login")
+                        .successHandler((request, response, authentication) -> {
+                            response.setStatus(HttpServletResponse.SC_OK);
+                        })
+                        .failureHandler((request, response, authentication) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                        }))
+                .logout(l -> l
+                        .logoutUrl("/auth/logout")
+                        .logoutSuccessHandler((request, response, authentication) -> {
+                            response.setStatus(HttpServletResponse.SC_OK);
+                        }))
 
-            .httpBasic(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable)
 
-            .authorizeHttpRequests(a -> a
-                .requestMatchers(HttpMethod.POST, "/events").hasAuthority("ADMIN")
-                .anyRequest().authenticated())
-            .build();
+                .authorizeHttpRequests(a -> a
+                        .requestMatchers(HttpMethod.GET, "/events").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/events").hasAuthority("ADMIN")
+                        .anyRequest().authenticated())
+                .build();
     }
 
     @Bean
@@ -62,6 +67,5 @@ public class WebSecurityConfig {
         source.registerCorsConfiguration("/**", corsConfiguration);
         return source;
     }
-    
 
 }

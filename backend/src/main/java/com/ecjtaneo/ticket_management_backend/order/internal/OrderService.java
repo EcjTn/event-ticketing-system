@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import com.ecjtaneo.ticket_management_backend.event.EventApi;
@@ -17,6 +18,7 @@ import com.ecjtaneo.ticket_management_backend.order.internal.model.Order;
 import com.ecjtaneo.ticket_management_backend.order.internal.model.OrderItem;
 import com.ecjtaneo.ticket_management_backend.order.internal.repository.OrderItemRepository;
 import com.ecjtaneo.ticket_management_backend.order.internal.repository.OrderRepository;
+import com.ecjtaneo.ticket_management_backend.shared.events.OrderCreatedEvent;
 import com.ecjtaneo.ticket_management_backend.shared.exceptions.ValidationException;
 
 import jakarta.transaction.Transactional;
@@ -27,10 +29,10 @@ import lombok.RequiredArgsConstructor;
 public class OrderService {
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
+    private final ApplicationEventPublisher eventPublisher;
     private final OrderMapper mapper;
     private final EventApi eventApi;
 
-    // TODO: emit application event after order creation
     @Transactional
     public OrderInfoResponseDto createOrder(CreateOrderRequestDto request, Long userId) {
         eventApi.validateEventIsPublished(request.eventId());
@@ -41,6 +43,8 @@ public class OrderService {
         Order order = buildAndSaveOrder(request.eventId(), userId, totalAmount);
         saveOrderItems(orderItems, order);
         updateEventTierCounts(orderItems);
+
+        eventPublisher.publishEvent(new OrderCreatedEvent(order.getId(), userId, totalAmount));
 
         return mapper.toOrderInfoResponseDto(order);
     }

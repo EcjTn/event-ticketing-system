@@ -44,7 +44,7 @@ public class OrderService {
         saveOrderItems(orderItems, order);
         updateEventTierCounts(orderItems);
 
-        eventPublisher.publishEvent(new OrderCreatedEvent(order.getId(), userId, totalAmount));
+        eventPublisher.publishEvent(new OrderCreatedEvent(request.eventId(), order.getId(), userId, totalAmount));
 
         return mapper.toOrderInfoResponseDto(order);
     }

@@ -11,8 +11,9 @@ import org.springframework.data.jpa.repository.EntityGraph;
 
 public interface EventRepository extends JpaRepository<Event, Long> {
     public List<Event> findTop10ByStatusOrderByIdDesc(EventStatus status);
+
     public List<Event> findTop10ByIdLessThanOrderByIdDesc(Long lastSeenId);
 
-    @EntityGraph(attributePaths = {"tiers"})
-    Optional<Event> findByIdWithTiers(Long id);
+    @EntityGraph(attributePaths = { "tiers" })
+    Optional<Event> findWithTiersById(Long id);
 }

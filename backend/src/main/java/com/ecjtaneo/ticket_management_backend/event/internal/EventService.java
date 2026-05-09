@@ -40,7 +40,7 @@ public class EventService implements EventApi {
         }
 
         public EventInfoResponseDto getEventInfoById(Long id) {
-                Event event = eventRepository.findByIdWithTiers(id)
+                Event event = eventRepository.findWithTiersById(id)
                                 .orElseThrow(() -> new ResourceNotFoundException("Event not found with id: " + id));
 
                 EventInfoResponseDto eventInfoResponseDto = mapper.toEventInfoDto(event);

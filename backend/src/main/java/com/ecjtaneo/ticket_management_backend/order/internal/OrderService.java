@@ -29,55 +29,64 @@ public class OrderService {
     private final OrderItemRepository orderItemRepository;
     private final OrderMapper mapper;
     private final EventApi eventApi;
-    private final LocalDateTime orderExpiresAt = LocalDateTime.now().plusMinutes(15);
 
     // TODO: emit application event after order creation
-    // TODO: Separate order creation logic for readability
     @Transactional
     public OrderInfoResponseDto createOrder(CreateOrderRequestDto request, Long userId) {
         eventApi.validateEventIsPublished(request.eventId());
-        
+
+        List<OrderItem> orderItems = processOrderItems(request.items());
+        BigDecimal totalAmount = calculateTotalAmount(orderItems);
+
+        Order order = buildAndSaveOrder(request.eventId(), userId, totalAmount);
+        saveOrderItems(orderItems, order);
+        updateEventTierCounts(orderItems);
+
+        return mapper.toOrderInfoResponseDto(order);
+    }
+
+    private List<OrderItem> processOrderItems(List<OrderItemRequestDto> itemRequests) {
         List<OrderItem> orderItems = new ArrayList<>();
-        BigDecimal totalAmount = BigDecimal.ZERO;
-
-        for (OrderItemRequestDto item : request.items()) {
-
+        for (OrderItemRequestDto item : itemRequests) {
             // Locks the event tier on this call
             EventTierBasicInfo tier = eventApi.getEventTierInfo(item.eventTierId());
 
-            if(tier.quantity() < item.quantity()) {
+            if (tier.quantity() < item.quantity()) {
                 throw new ValidationException("Not enough tickets available");
             }
 
             OrderItem orderItem = new OrderItem();
-            orderItem.setOrder(null);
             orderItem.setEventTierId(item.eventTierId());
             orderItem.setTier(tier.tier());
             orderItem.setQuantity(item.quantity());
             orderItem.setUnitPrice(tier.price());
             orderItems.add(orderItem);
-
-            totalAmount = totalAmount.add(
-                tier.price().multiply(
-                    BigDecimal.valueOf(item.quantity())
-                ));
-
         }
+        return orderItems;
+    }
 
-        Order order = new Order(); // reminder default status = PENDING 
+    private BigDecimal calculateTotalAmount(List<OrderItem> orderItems) {
+        return orderItems.stream()
+                .map(item -> item.getUnitPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private Order buildAndSaveOrder(Long eventId, Long userId, BigDecimal totalAmount) {
+        Order order = new Order(); // reminder default status = PENDING
         order.setUserId(userId);
-        order.setEventId(request.eventId());
+        order.setEventId(eventId);
         order.setTotalAmount(totalAmount);
-        order.setExpiresAt(orderExpiresAt);
-        orderRepository.save(order);
+        order.setExpiresAt(LocalDateTime.now().plusMinutes(15));
+        return orderRepository.save(order);
+    }
 
+    private void saveOrderItems(List<OrderItem> orderItems, Order order) {
         orderItems.forEach(item -> item.setOrder(order));
         orderItemRepository.saveAll(orderItems);
+    }
 
-    
+    private void updateEventTierCounts(List<OrderItem> orderItems) {
         orderItems.forEach(item -> eventApi.incrementEventTierSoldCount(item.getEventTierId(), item.getQuantity()));
-
-        return mapper.toOrderInfoResponseDto(order);
     }
 
 }

@@ -18,7 +18,7 @@ import com.ecjtaneo.ticket_management_backend.shared.events.OrderCancelledEvent;
 import com.ecjtaneo.ticket_management_backend.shared.exceptions.ValidationException;
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.context.event.EventListener;
+import org.springframework.modulith.events.ApplicationModuleListener;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -103,14 +103,9 @@ public class EventService implements EventApi {
                 eventTierRepository.incrementSoldCount(tierId, quantity);
         }
 
-        @Transactional
-        public void decrementEventTierSoldCount(Long tierId, int quantity) {
-                eventTierRepository.decrementSoldCount(tierId, quantity);
-        }
-
-        @EventListener
+        @ApplicationModuleListener
         public void onOrderCancelled(OrderCancelledEvent event) {
-                event.tierQuantities().forEach((tierId, quantity) -> decrementEventTierSoldCount(tierId, quantity));
+                event.tierQuantities().forEach((tierId, quantity) -> eventTierRepository.decrementSoldCount(tierId, quantity));
         }
 
 }

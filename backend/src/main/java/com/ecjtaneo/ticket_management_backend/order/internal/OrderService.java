@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.ecjtaneo.ticket_management_backend.event.EventApi;
@@ -32,6 +33,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class OrderService {
+    private static final long EXPIRATION_CHECK_RATE_MS = 60000;
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final ApplicationEventPublisher eventPublisher;
@@ -122,6 +124,27 @@ public class OrderService {
                 .collect(Collectors.toMap(OrderItem::getEventTierId, OrderItem::getQuantity));
 
         eventPublisher.publishEvent(new OrderCancelledEvent(order.getId(), tierQuantities));
+    }
+
+    @Scheduled(fixedRate = EXPIRATION_CHECK_RATE_MS)
+    @Transactional
+    public void cancelExpiredPendingOrders() {
+        // fetches 50 expired orders with their items
+        List<Order> expiredOrders = orderRepository.findExpiredOrders(
+                OrderStatus.PENDING, LocalDateTime.now());
+
+        if (expiredOrders.isEmpty())
+            return;
+
+        List<Long> expiredOrderIds = expiredOrders.stream()
+                .map(Order::getId)
+                .toList();
+
+        orderRepository.updateStatusByIds(OrderStatus.CANCELLED, expiredOrderIds);
+
+        for (Order order : expiredOrders) {
+            publishOrderCancelledEvent(order);
+        }
     }
 
 }

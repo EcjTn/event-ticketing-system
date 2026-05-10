@@ -33,7 +33,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class OrderService {
-    private static final long EXPIRATION_CHECK_RATE_MS = 60000;
+    private static final long EXPIRATION_CHECK_RATE_MS = 600_000; // 10 minutes
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final ApplicationEventPublisher eventPublisher;
@@ -126,7 +126,7 @@ public class OrderService {
         eventPublisher.publishEvent(new OrderCancelledEvent(order.getId(), tierQuantities));
     }
 
-    @Scheduled(fixedRate = EXPIRATION_CHECK_RATE_MS)
+    @Scheduled(fixedDelay = EXPIRATION_CHECK_RATE_MS)
     @Transactional
     public void cancelExpiredPendingOrders() {
         // fetches 50 expired orders with their items

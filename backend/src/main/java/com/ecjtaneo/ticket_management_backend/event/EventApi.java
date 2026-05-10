@@ -7,5 +7,4 @@ public interface EventApi {
 
     public void incrementEventTierSoldCount(Long tierId, int quantity);
 
-    public void decrementEventTierSoldCount(Long tierId, int quantity);
 }

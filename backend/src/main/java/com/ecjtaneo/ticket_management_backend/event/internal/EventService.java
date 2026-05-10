@@ -14,8 +14,11 @@ import com.ecjtaneo.ticket_management_backend.event.internal.repository.EventTie
 import com.ecjtaneo.ticket_management_backend.shared.dtos.MessageResponseDto;
 import com.ecjtaneo.ticket_management_backend.shared.exceptions.ResourceNotFoundException;
 
+import com.ecjtaneo.ticket_management_backend.shared.events.OrderCancelledEvent;
 import com.ecjtaneo.ticket_management_backend.shared.exceptions.ValidationException;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.context.event.EventListener;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -100,10 +103,14 @@ public class EventService implements EventApi {
                 eventTierRepository.incrementSoldCount(tierId, quantity);
         }
 
-        @Override
         @Transactional
         public void decrementEventTierSoldCount(Long tierId, int quantity) {
                 eventTierRepository.decrementSoldCount(tierId, quantity);
+        }
+
+        @EventListener
+        public void onOrderCancelled(OrderCancelledEvent event) {
+                event.tierQuantities().forEach((tierId, quantity) -> decrementEventTierSoldCount(tierId, quantity));
         }
 
 }

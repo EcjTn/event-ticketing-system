@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,7 @@ import com.ecjtaneo.ticket_management_backend.order.internal.model.OrderStatus;
 import com.ecjtaneo.ticket_management_backend.order.internal.repository.OrderItemRepository;
 import com.ecjtaneo.ticket_management_backend.order.internal.repository.OrderRepository;
 import com.ecjtaneo.ticket_management_backend.shared.dtos.MessageResponseDto;
+import com.ecjtaneo.ticket_management_backend.shared.events.OrderCancelledEvent;
 import com.ecjtaneo.ticket_management_backend.shared.events.OrderCreatedEvent;
 import com.ecjtaneo.ticket_management_backend.shared.exceptions.ValidationException;
 
@@ -105,13 +108,20 @@ public class OrderService {
                 .orElseThrow(() -> new ValidationException("Order not found or already cancelled"));
 
         order.setStatus(OrderStatus.CANCELLED);
-        revertEventTierCounts(order.getItems());
+
+        publishOrderCancelledEvent(order);
 
         return new MessageResponseDto("Order cancelled successfully");
     }
 
-    private void revertEventTierCounts(List<OrderItem> orderItems) {
-        orderItems.forEach(item -> eventApi.decrementEventTierSoldCount(item.getEventTierId(), item.getQuantity()));
+    private void publishOrderCancelledEvent(Order order) {
+        // key = tier id
+        // value = quantity
+        // currently max tiers per order is 3
+        Map<Long, Integer> tierQuantities = order.getItems().stream()
+                .collect(Collectors.toMap(OrderItem::getEventTierId, OrderItem::getQuantity));
+
+        eventPublisher.publishEvent(new OrderCancelledEvent(order.getId(), tierQuantities));
     }
 
 }

@@ -14,9 +14,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
-    @EntityGraph(attributePaths = { "items" })
-    Optional<Order> findWithItemsById(Long id);
-
     boolean existsByIdAndUserId(Long id, Long userId);
 
     @EntityGraph(attributePaths = { "items" })

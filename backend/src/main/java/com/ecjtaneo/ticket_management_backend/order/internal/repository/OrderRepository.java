@@ -24,7 +24,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findExpiredOrders(@Param("status") OrderStatus status, @Param("dateTime") LocalDateTime dateTime);
 
     @Modifying
-    @Query("UPDATE Order o SET o.status = :status WHERE o.id IN :ids")
+    @Query("UPDATE Order o SET o.status = :status WHERE o.id IN :ids AND o.status = 'PENDING' ")
     void updateStatusByIds(@Param("status") OrderStatus status, @Param("ids") List<Long> ids);
     
 }

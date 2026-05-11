@@ -3,6 +3,7 @@ package com.ecjtaneo.ticket_management_backend.order.internal;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -34,7 +35,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class OrderService {
     private final long expirationCheckRateMs = 600_000; // 10 minutes
-    private final int maxOrderItems = 5;
+    private final int maxOrderItemsPerOrder = 5;
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final ApplicationEventPublisher eventPublisher;
@@ -58,10 +59,20 @@ public class OrderService {
     }
 
     private List<OrderItem> processOrderItems(List<OrderItemRequestDto> itemRequests) {
-        List<OrderItem> orderItems = new ArrayList<>();
-        for (OrderItemRequestDto item : itemRequests) {
+        // sort by tier id to prevent deadlocks when locking tiers
+        // If 2 threads
+        // T1 (Order 1): lock tier 1 then tier 2
+        // T2 (Order 2): lock tier 2 then tier 1
+        // causes deadlock, so we sort by tier id to ensure consistent locking order
+        List<OrderItemRequestDto> sorted = itemRequests.stream()
+                .sorted(Comparator.comparing(OrderItemRequestDto::eventTierId))
+                .toList();
 
-            if (item.quantity() > maxOrderItems) {
+        List<OrderItem> orderItems = new ArrayList<>();
+
+        for (OrderItemRequestDto item : sorted) {
+
+            if (item.quantity() > maxOrderItemsPerOrder) {
                 throw new ValidationException("Too many tickets requested");
             }
 

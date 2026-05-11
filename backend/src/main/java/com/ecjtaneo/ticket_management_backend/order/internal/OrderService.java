@@ -33,7 +33,8 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class OrderService {
-    private static final long EXPIRATION_CHECK_RATE_MS = 600_000; // 10 minutes
+    private final long expirationCheckRateMs = 600_000; // 10 minutes
+    private final int maxOrderItems = 5;
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final ApplicationEventPublisher eventPublisher;
@@ -59,11 +60,17 @@ public class OrderService {
     private List<OrderItem> processOrderItems(List<OrderItemRequestDto> itemRequests) {
         List<OrderItem> orderItems = new ArrayList<>();
         for (OrderItemRequestDto item : itemRequests) {
+
+            if (item.quantity() > maxOrderItems) {
+                throw new ValidationException("Too many tickets requested");
+            }
+
             // Locks the event tier on this call
             EventTierBasicInfo tier = eventApi.getEventTierInfo(item.eventTierId());
+            Integer available = tier.quantity() - tier.soldCount();
 
-            if (tier.quantity() < item.quantity()) {
-                throw new ValidationException("Not enough tickets available");
+            if (available < item.quantity()) {
+                throw new ValidationException("Not enough tickets available for tier " + tier.tier());
             }
 
             OrderItem orderItem = new OrderItem();
@@ -126,7 +133,7 @@ public class OrderService {
         eventPublisher.publishEvent(new OrderCancelledEvent(order.getId(), tierQuantities));
     }
 
-    @Scheduled(fixedDelay = EXPIRATION_CHECK_RATE_MS)
+    @Scheduled(fixedDelay = expirationCheckRateMs)
     @Transactional
     public void processExpiredOrders() {
         List<Order> expiredOrders = orderRepository.findTop50ByStatusAndExpiresAtBefore(

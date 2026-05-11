@@ -20,11 +20,11 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     Optional<Order> findByIdAndStatus(Long id, OrderStatus status);
 
     @EntityGraph(attributePaths = { "items" })
-    @Query("SELECT o FROM Order o WHERE o.status = :status AND o.expiresAt < :dateTime LIMIT 50")
-    List<Order> findExpiredOrders(@Param("status") OrderStatus status, @Param("dateTime") LocalDateTime dateTime);
+    List<Order> findTop50ByStatusAndExpiresAtBefore(OrderStatus status, LocalDateTime expiresAt);
 
     @Modifying
-    @Query("UPDATE Order o SET o.status = :status WHERE o.id IN :ids AND o.status = 'PENDING' ")
-    void updateStatusByIds(@Param("status") OrderStatus status, @Param("ids") List<Long> ids);
-    
+    @Query("UPDATE Order o SET o.status = :newStatus WHERE o.id IN :ids AND o.status = :previousStatus")
+    void updateStatusByIds(@Param("newStatus") OrderStatus newStatus, @Param("ids") List<Long> ids,
+            @Param("previousStatus") OrderStatus previousStatus);
+
 }

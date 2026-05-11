@@ -128,9 +128,8 @@ public class OrderService {
 
     @Scheduled(fixedDelay = EXPIRATION_CHECK_RATE_MS)
     @Transactional
-    public void cancelExpiredPendingOrders() {
-        // fetches 50 expired orders with their items
-        List<Order> expiredOrders = orderRepository.findExpiredOrders(
+    public void processExpiredOrders() {
+        List<Order> expiredOrders = orderRepository.findTop50ByStatusAndExpiresAtBefore(
                 OrderStatus.PENDING, LocalDateTime.now());
 
         if (expiredOrders.isEmpty())
@@ -140,7 +139,7 @@ public class OrderService {
                 .map(Order::getId)
                 .toList();
 
-        orderRepository.updateStatusByIds(OrderStatus.CANCELLED, expiredOrderIds);
+        orderRepository.updateStatusByIds(OrderStatus.CANCELLED, expiredOrderIds, OrderStatus.PENDING);
 
         for (Order order : expiredOrders) {
             publishOrderCancelledEvent(order);

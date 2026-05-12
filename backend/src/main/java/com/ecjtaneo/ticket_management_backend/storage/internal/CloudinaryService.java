@@ -2,7 +2,7 @@ package com.ecjtaneo.ticket_management_backend.storage.internal;
 
 import com.cloudinary.Cloudinary;
 import com.ecjtaneo.ticket_management_backend.shared.exceptions.ValidationException;
-import com.ecjtaneo.ticket_management_backend.storage.StorageService;
+import com.ecjtaneo.ticket_management_backend.storage.StorageApi;
 import org.apache.tika.Tika;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class CloudinaryService implements StorageService {
+public class CloudinaryService implements StorageApi {
     private final Cloudinary cloudinary;
     private final Tika tika = new Tika();
     private final List<String> allowedMimeTypes = List.of("image/jpeg", "image/png", "image/webp");
@@ -23,7 +23,7 @@ public class CloudinaryService implements StorageService {
 
     public void validateFile(MultipartFile file) throws IOException {
         String detectedMimeType = tika.detect(file.getInputStream());
-        if(!allowedMimeTypes.contains(detectedMimeType)) {
+        if (!allowedMimeTypes.contains(detectedMimeType)) {
             throw new ValidationException("Invalid file type.");
         }
     }
@@ -34,8 +34,7 @@ public class CloudinaryService implements StorageService {
         Map<String, Object> options = Map.of(
                 "folder", "uploads/profiles",
                 "public_id", "user_" + userId,
-                "overwrite", true
-        );
+                "overwrite", true);
         return cloudinary.uploader().uploadLarge(file.getInputStream(), options)
                 .get("secure_url").toString();
     }
@@ -45,8 +44,8 @@ public class CloudinaryService implements StorageService {
         this.validateFile(file);
         Map<String, Object> options = Map.of(
                 "folder", "uploads/events",
-                "public_id", "user_" + eventId
-        );
+                "public_id", "event_" + eventId,
+                "overwrite", true);
         return cloudinary.uploader().uploadLarge(file.getInputStream(), options)
                 .get("secure_url").toString();
     }

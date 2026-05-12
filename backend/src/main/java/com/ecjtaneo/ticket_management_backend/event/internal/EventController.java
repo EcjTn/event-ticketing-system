@@ -8,9 +8,11 @@ import com.ecjtaneo.ticket_management_backend.shared.dtos.MessageResponseDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/events")
@@ -31,7 +33,8 @@ public class EventController {
     }
 
     @PostMapping
-    public MessageResponseDto createEvent(@Valid @RequestBody CreateEventRequestDto dto, @CurrentUserId Long userId) {
-        return service.createEvent(dto, userId);
+    public MessageResponseDto createEvent(@RequestPart("data") @Valid CreateEventRequestDto dto,
+            @RequestPart("image") MultipartFile image, @CurrentUserId Long userId) throws IOException {
+        return service.createEvent(dto, image, userId);
     }
 }

@@ -11,6 +11,7 @@ import com.ecjtaneo.ticket_management_backend.event.internal.model.EventStatus;
 import com.ecjtaneo.ticket_management_backend.event.internal.model.EventTier;
 import com.ecjtaneo.ticket_management_backend.event.internal.repository.EventRepository;
 import com.ecjtaneo.ticket_management_backend.event.internal.repository.EventTierRepository;
+import com.ecjtaneo.ticket_management_backend.storage.StorageApi;
 import com.ecjtaneo.ticket_management_backend.shared.dtos.MessageResponseDto;
 import com.ecjtaneo.ticket_management_backend.shared.exceptions.ResourceNotFoundException;
 
@@ -22,7 +23,9 @@ import org.springframework.modulith.events.ApplicationModuleListener;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @Service
@@ -31,6 +34,7 @@ public class EventService implements EventApi {
         private final EventRepository eventRepository;
         private final EventTierRepository eventTierRepository;
         private final EventMapper mapper;
+        private final StorageApi storageApi;
 
         public List<EventBasicInfoResponseDto> getEvents() {
                 return mapper.toEventBasicInfoDtoList(
@@ -58,10 +62,14 @@ public class EventService implements EventApi {
         }
 
         @Transactional
-        public MessageResponseDto createEvent(CreateEventRequestDto dto, Long createdBy) {
+        public MessageResponseDto createEvent(CreateEventRequestDto dto, MultipartFile image, Long createdBy)
+                        throws IOException {
                 Event event = mapper.toEvent(dto);
                 event.setCreatedBy(createdBy);
                 // event.setStatus(EventStatus.DRAFT); --- this is the default
+
+                String imageUrl = storageApi.uploadEventPhoto(image, event.getId());
+                event.setImageUrl(imageUrl);
 
                 Event savedEvent = eventRepository.save(event);
 
@@ -105,7 +113,8 @@ public class EventService implements EventApi {
 
         @ApplicationModuleListener
         public void onOrderCancelled(OrderCancelledEvent event) {
-                event.tierQuantities().forEach((tierId, quantity) -> eventTierRepository.decrementSoldCount(tierId, quantity));
+                event.tierQuantities().forEach(
+                                (tierId, quantity) -> eventTierRepository.decrementSoldCount(tierId, quantity));
         }
 
 }

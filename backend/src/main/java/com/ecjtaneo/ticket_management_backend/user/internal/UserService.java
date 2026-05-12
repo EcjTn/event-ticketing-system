@@ -9,7 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.ecjtaneo.ticket_management_backend.shared.dtos.MessageResponseDto;
 import com.ecjtaneo.ticket_management_backend.shared.exceptions.ResourceNotFoundException;
-import com.ecjtaneo.ticket_management_backend.storage.StorageService;
+import com.ecjtaneo.ticket_management_backend.storage.StorageApi;
 import com.ecjtaneo.ticket_management_backend.user.UserApi;
 import com.ecjtaneo.ticket_management_backend.user.internal.dto.UserInfoResponseDto;
 import com.ecjtaneo.ticket_management_backend.user.internal.mapper.UserMapper;
@@ -22,30 +22,30 @@ import lombok.RequiredArgsConstructor;
 public class UserService implements UserApi {
     private final UserRepository repository;
     private final UserMapper mapper;
-    private final StorageService storageService;
+    private final StorageApi storageApi;
 
     public UserInfoResponseDto getUserInfo(Long userId) {
         User user = repository.findById(userId)
-            .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         return mapper.toUserInfoResponseDto(user);
     }
 
     @Override
     public UserBasicInfo getUserBasicInfo(String name) {
         User user = repository.findByName(name)
-            .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         return mapper.toBasicInfo(user);
     }
 
     public MessageResponseDto changeProfilePhoto(MultipartFile file, Long userId) throws IOException {
         User user = repository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        String fileUrl = storageService.uploadUserProfilePhoto(file, userId);
+        String fileUrl = storageApi.uploadUserProfilePhoto(file, userId);
 
         user.setProfileImageUrl(fileUrl);
         repository.save(user);
 
         return new MessageResponseDto("Profile updated successfully");
     }
-    
+
 }

@@ -33,16 +33,17 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             WITH expired e AS (
                 SELECT id FROM orders
                 WHERE expires_at < NOW()
-                AND status = 'PENDING'
+                AND status = :prevStatus
                 LIMIT 500
                 FOR UPDATE SKIP LOCKED
             )
             UPDATE orders o
-            SET status = 'CANCELLED'
+            SET status = :newStatus
             FROM expired e
             WHERE o.id = e.id
             RETURNING o.id;
             """, nativeQuery = true)
-    List<Long> cancelExpiredOrders();
+    List<Long> cancelExpiredOrders(@Param("prevStatus") OrderStatus prevStatus,
+            @Param("newStatus") OrderStatus newStatus);
 
 }

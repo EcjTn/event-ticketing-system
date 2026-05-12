@@ -27,4 +27,22 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     void updateStatusByIds(@Param("newStatus") OrderStatus newStatus, @Param("ids") List<Long> ids,
             @Param("previousStatus") OrderStatus previousStatus);
 
+    // Trying out new method for batch cancelling
+
+    @Query(value = """
+            WITH expired e AS (
+                SELECT id FROM orders
+                WHERE expires_at < NOW()
+                AND status = 'PENDING'
+                LIMIT 500
+                FOR UPDATE SKIP LOCKED
+            )
+            UPDATE orders o
+            SET status = 'CANCELLED'
+            FROM expired e
+            WHERE o.id = e.id
+            RETURNING o.id;
+            """, nativeQuery = true)
+    List<Long> cancelExpiredOrders();
+
 }

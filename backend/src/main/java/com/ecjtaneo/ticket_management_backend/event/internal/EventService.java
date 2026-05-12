@@ -15,7 +15,7 @@ import com.ecjtaneo.ticket_management_backend.storage.StorageApi;
 import com.ecjtaneo.ticket_management_backend.shared.dtos.MessageResponseDto;
 import com.ecjtaneo.ticket_management_backend.shared.exceptions.ResourceNotFoundException;
 
-import com.ecjtaneo.ticket_management_backend.shared.events.OrderCancelledEvent;
+import com.ecjtaneo.ticket_management_backend.shared.events.EventTierStockRestoreEvent;
 import com.ecjtaneo.ticket_management_backend.shared.exceptions.ValidationException;
 import lombok.RequiredArgsConstructor;
 
@@ -112,9 +112,10 @@ public class EventService implements EventApi {
         }
 
         @ApplicationModuleListener
-        public void onOrderCancelled(OrderCancelledEvent event) {
-                event.tierQuantities().forEach(
-                                (tierId, quantity) -> eventTierRepository.decrementSoldCount(tierId, quantity));
+        public void onEventTierStockRestore(EventTierStockRestoreEvent event) {
+                eventTierRepository.decrementSoldCount(
+                                event.restoreView().eventTierId(),
+                                event.restoreView().totalQuantity());
         }
 
 }

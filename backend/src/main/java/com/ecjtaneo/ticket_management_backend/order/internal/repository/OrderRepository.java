@@ -3,6 +3,7 @@ package com.ecjtaneo.ticket_management_backend.order.internal.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import com.ecjtaneo.ticket_management_backend.order.internal.model.Order;
 import com.ecjtaneo.ticket_management_backend.order.internal.model.OrderStatus;
+import com.ecjtaneo.ticket_management_backend.shared.TicketRestoreView;
 
 import java.util.Optional;
 import java.util.List;
@@ -19,31 +20,30 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @EntityGraph(attributePaths = { "items" })
     Optional<Order> findByIdAndStatus(Long id, OrderStatus status);
 
-    @EntityGraph(attributePaths = { "items" })
-    List<Order> findTop50ByStatusAndExpiresAtBefore(OrderStatus status, LocalDateTime expiresAt);
-
-    @Modifying
-    @Query("UPDATE Order o SET o.status = :newStatus WHERE o.id IN :ids AND o.status = :previousStatus")
-    void updateStatusByIds(@Param("newStatus") OrderStatus newStatus, @Param("ids") List<Long> ids,
-            @Param("previousStatus") OrderStatus previousStatus);
-
     // Trying out new method for batch cancelling
-
     @Query(value = """
-            WITH expired e AS (
-                SELECT id FROM orders
-                WHERE expires_at < NOW()
-                AND status = :prevStatus
-                LIMIT 500
-                FOR UPDATE SKIP LOCKED
+            WITH cancelled AS (
+                UPDATE orders o
+                SET status = :newStatus
+                WHERE o.id IN (
+                    SELECT id
+                    FROM orders
+                    WHERE status = :prevStatus
+                    AND expires_at < now()
+                    ORDER BY expires_at
+                    LIMIT 500
+                    FOR UPDATE SKIP LOCKED
+                )
+                RETURNING o.id
             )
-            UPDATE orders o
-            SET status = :newStatus
-            FROM expired e
-            WHERE o.id = e.id
-            RETURNING o.id;
+            SELECT
+                oi.event_tier_id AS eventTierId,
+                SUM(oi.quantity) AS totalQuantity
+            FROM order_items oi
+            JOIN cancelled c ON c.id = oi.order_id
+            GROUP BY oi.event_tier_id;
             """, nativeQuery = true)
-    List<Long> cancelExpiredOrders(@Param("prevStatus") OrderStatus prevStatus,
+    List<TicketRestoreView> cancelExpiredOrders(@Param("prevStatus") OrderStatus prevStatus,
             @Param("newStatus") OrderStatus newStatus);
 
 }

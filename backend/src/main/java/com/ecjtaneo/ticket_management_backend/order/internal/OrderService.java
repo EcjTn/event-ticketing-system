@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -23,8 +24,9 @@ import com.ecjtaneo.ticket_management_backend.order.internal.model.OrderItem;
 import com.ecjtaneo.ticket_management_backend.order.internal.model.OrderStatus;
 import com.ecjtaneo.ticket_management_backend.order.internal.repository.OrderItemRepository;
 import com.ecjtaneo.ticket_management_backend.order.internal.repository.OrderRepository;
+import com.ecjtaneo.ticket_management_backend.shared.TicketRestoreView;
 import com.ecjtaneo.ticket_management_backend.shared.dtos.MessageResponseDto;
-import com.ecjtaneo.ticket_management_backend.shared.events.OrderCancelledEvent;
+import com.ecjtaneo.ticket_management_backend.shared.events.EventTierStockRestoreEvent;
 import com.ecjtaneo.ticket_management_backend.shared.events.OrderCreatedEvent;
 import com.ecjtaneo.ticket_management_backend.shared.exceptions.ValidationException;
 
@@ -124,49 +126,42 @@ public class OrderService {
         return orderRepository.existsByIdAndUserId(orderId, userId);
     }
 
-    @Transactional
-    public MessageResponseDto cancelOrder(Long orderId) {
-        Order order = orderRepository.findByIdAndStatus(orderId, OrderStatus.PENDING)
-                .orElseThrow(() -> new ValidationException("Order not found or already cancelled"));
+    // TODO: Re implement cancelOrder method(single order not batch)
 
-        order.setStatus(OrderStatus.CANCELLED);
+    // @Transactional
+    // public MessageResponseDto cancelOrder(Long orderId) {
+    // Order order = orderRepository.findByIdAndStatus(orderId, OrderStatus.PENDING)
+    // .orElseThrow(() -> new ValidationException("Order not found or already
+    // cancelled"));
 
-        publishOrderCancelledEvent(order);
+    // order.setStatus(OrderStatus.CANCELLED);
 
-        return new MessageResponseDto("Order cancelled successfully");
-    }
+    // publishOrderCancelledEvent(order);
 
-    private void publishOrderCancelledEvent(Order order) {
-        // key = tier id
-        // value = quantity
-        // currently max tiers per order is 3
-        Map<Long, Integer> tierQuantities = order.getItems().stream()
-                .collect(Collectors.toMap(OrderItem::getEventTierId, OrderItem::getQuantity));
+    // return new MessageResponseDto("Order cancelled successfully");
+    // }
 
-        eventPublisher.publishEvent(new OrderCancelledEvent(order.getId(), tierQuantities));
-    }
+    // private void publishOrderCancelledEvent(Order order) {
+    // eventPublisher.publishEvent(new OrderCancelledEvent(order.getId(), null));
+    // }
 
     @Scheduled(fixedDelay = expirationCheckRateMs)
     @Transactional
     public void processExpiredOrders() {
         log.info("Starting to process expired orders");
 
-        List<Order> expiredOrders = orderRepository.findTop50ByStatusAndExpiresAtBefore(
-                OrderStatus.PENDING, LocalDateTime.now());
+        // cancel 500 expired orders and get the list of event tiers
+        // and quantities to restore
+        List<TicketRestoreView> restoreViews = orderRepository.cancelExpiredOrders(
+                OrderStatus.PENDING, OrderStatus.CANCELLED);
 
-        if (expiredOrders.isEmpty()) {
+        if (restoreViews.isEmpty()) {
             log.info("No expired orders found");
             return;
         }
 
-        List<Long> expiredOrderIds = expiredOrders.stream()
-                .map(Order::getId)
-                .toList();
-
-        orderRepository.updateStatusByIds(OrderStatus.CANCELLED, expiredOrderIds, OrderStatus.PENDING);
-
-        for (Order order : expiredOrders) {
-            publishOrderCancelledEvent(order);
+        for (TicketRestoreView ticketRestoreView : restoreViews) {
+            eventPublisher.publishEvent(new EventTierStockRestoreEvent(ticketRestoreView));
         }
     }
 

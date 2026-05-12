@@ -30,9 +30,11 @@ import com.ecjtaneo.ticket_management_backend.shared.exceptions.ValidationExcept
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class OrderService {
     private final long expirationCheckRateMs = 600_000; // 10 minutes
     private final int maxOrderItemsPerOrder = 5;
@@ -147,11 +149,15 @@ public class OrderService {
     @Scheduled(fixedDelay = expirationCheckRateMs)
     @Transactional
     public void processExpiredOrders() {
+        log.info("Starting to process expired orders");
+
         List<Order> expiredOrders = orderRepository.findTop50ByStatusAndExpiresAtBefore(
                 OrderStatus.PENDING, LocalDateTime.now());
 
-        if (expiredOrders.isEmpty())
+        if (expiredOrders.isEmpty()) {
+            log.info("No expired orders found");
             return;
+        }
 
         List<Long> expiredOrderIds = expiredOrders.stream()
                 .map(Order::getId)

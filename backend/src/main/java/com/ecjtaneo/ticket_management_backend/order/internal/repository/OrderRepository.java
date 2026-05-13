@@ -14,7 +14,6 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
     boolean existsByIdAndUserId(Long id, Long userId);
@@ -27,11 +26,11 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query(value = """
             WITH cancelled AS (
                 UPDATE orders o
-                SET status = :newStatus
+                SET status = 'CANCELLED'
                 WHERE o.id IN (
                     SELECT id
                     FROM orders
-                    WHERE status = :prevStatus
+                    WHERE status = 'PENDING'
                     AND expires_at < now()
                     ORDER BY expires_at
                     LIMIT 100
@@ -42,11 +41,10 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             SELECT
                 oi.event_tier_id AS eventTierId,
                 SUM(oi.quantity) AS totalQuantity
-            FROM order_items oi
+            FROM order_item oi
             JOIN cancelled c ON c.id = oi.order_id
             GROUP BY oi.event_tier_id;
             """, nativeQuery = true)
-    List<EventTierQuantityAggregate> cancelExpiredOrdersBatch(@Param("prevStatus") OrderStatus prevStatus,
-            @Param("newStatus") OrderStatus newStatus);
+    List<EventTierQuantityAggregate> batchCancelExpiredOrders();
 
 }

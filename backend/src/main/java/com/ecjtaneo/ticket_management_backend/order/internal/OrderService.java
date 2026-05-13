@@ -4,10 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -152,8 +149,7 @@ public class OrderService {
 
         // cancel 100 expired orders and get the list of event tiers
         // and quantities to restore
-        List<EventTierQuantityAggregate> restoreViews = orderRepository.cancelExpiredOrdersBatch(
-                OrderStatus.PENDING, OrderStatus.CANCELLED);
+        List<EventTierQuantityAggregate> restoreViews = orderRepository.batchCancelExpiredOrders();
 
         if (restoreViews.isEmpty()) {
             log.info("No expired orders found");

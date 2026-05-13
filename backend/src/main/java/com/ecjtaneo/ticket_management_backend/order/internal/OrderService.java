@@ -136,7 +136,7 @@ public class OrderService {
     public void processExpiredOrders() {
         log.info("Starting to process expired orders");
 
-        // cancel 500 expired orders and get the list of event tiers
+        // cancel 100 expired orders and get the list of event tiers
         // and quantities to restore
         List<EventTierQuantityAggregate> restoreViews = orderRepository.cancelExpiredOrdersBatch(
                 OrderStatus.PENDING, OrderStatus.CANCELLED);

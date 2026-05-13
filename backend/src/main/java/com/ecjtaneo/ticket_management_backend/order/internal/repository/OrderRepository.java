@@ -30,7 +30,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
                     WHERE status = :prevStatus
                     AND expires_at < now()
                     ORDER BY expires_at
-                    LIMIT 500
+                    LIMIT 100
                     FOR UPDATE SKIP LOCKED
                 )
                 RETURNING o.id

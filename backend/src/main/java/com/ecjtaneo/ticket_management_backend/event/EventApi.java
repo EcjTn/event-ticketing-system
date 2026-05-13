@@ -7,8 +7,6 @@ public interface EventApi {
 
     public EventTierBasicInfo getEventTierInfo(Long id);
 
-    public void incrementEventTierSoldCount(Long tierId, int quantity);
-
     public void batchDecrementEventTierSoldCount(List<EventTierQuantityAdjustment> adjustments);
 
     public void batchIncrementEventTierSoldCount(List<EventTierQuantityAdjustment> adjustments);

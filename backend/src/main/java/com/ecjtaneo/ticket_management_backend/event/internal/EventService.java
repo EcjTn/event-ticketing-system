@@ -106,12 +106,6 @@ public class EventService implements EventApi {
                 return mapper.toEventTierBasicInfo(eventTier);
         }
 
-        @Override
-        @Transactional
-        public void incrementEventTierSoldCount(Long tierId, int quantity) {
-                eventTierRepository.incrementSoldCount(tierId, quantity);
-        }
-
         // Batch update methods for releasing/incrementing sold counts
         // I created 2 methods instead of 1 Generic method, it's for explicit API usage
         // Of course it has its own trade-offs

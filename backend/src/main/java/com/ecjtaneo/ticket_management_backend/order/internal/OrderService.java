@@ -119,7 +119,10 @@ public class OrderService {
     }
 
     private void updateEventTierCounts(List<OrderItem> orderItems) {
-        orderItems.forEach(item -> eventApi.incrementEventTierSoldCount(item.getEventTierId(), item.getQuantity()));
+        List<EventTierQuantityAdjustment> adjustments = orderItems.stream()
+                .map(item -> new EventTierQuantityAdjustment(item.getEventTierId(), item.getQuantity()))
+                .toList();
+        eventApi.batchIncrementEventTierSoldCount(adjustments);
     }
 
     public boolean canCancelOrder(Long orderId, Long userId) {
@@ -127,23 +130,6 @@ public class OrderService {
     }
 
     // TODO: Re implement cancelOrder method(single order not batch)
-
-    // @Transactional
-    // public MessageResponseDto cancelOrder(Long orderId) {
-    // Order order = orderRepository.findByIdAndStatus(orderId, OrderStatus.PENDING)
-    // .orElseThrow(() -> new ValidationException("Order not found or already
-    // cancelled"));
-
-    // order.setStatus(OrderStatus.CANCELLED);
-
-    // publishOrderCancelledEvent(order);
-
-    // return new MessageResponseDto("Order cancelled successfully");
-    // }
-
-    // private void publishOrderCancelledEvent(Order order) {
-    // eventPublisher.publishEvent(new OrderCancelledEvent(order.getId(), null));
-    // }
 
     @Scheduled(fixedDelay = expirationCheckRateMs)
     @Transactional

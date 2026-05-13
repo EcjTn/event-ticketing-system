@@ -12,6 +12,7 @@ import com.ecjtaneo.ticket_management_backend.order.internal.dto.CreateOrderRequ
 import com.ecjtaneo.ticket_management_backend.order.internal.dto.OrderInfoResponseDto;
 import com.ecjtaneo.ticket_management_backend.shared.annotations.CurrentUserId;
 //import com.ecjtaneo.ticket_management_backend.shared.dtos.MessageResponseDto;
+import com.ecjtaneo.ticket_management_backend.shared.dtos.MessageResponseDto;
 
 import lombok.RequiredArgsConstructor;
 
@@ -26,10 +27,9 @@ public class OrderController {
         return orderService.createOrder(request, userId);
     }
 
-    // @PatchMapping("/{orderId}/cancel")
-    // @PreAuthorize("hasAuthority('ADMIN') or
-    // @orderService.canCancelOrder(#orderId, principal.userId)")
-    // public MessageResponseDto cancelOrder(@PathVariable Long orderId) {
-    // return orderService.cancelOrder(orderId);
-    // }
+    @PatchMapping("/{orderId}/cancel")
+    @PreAuthorize("hasAuthority('ADMIN') or @orderService.canCancelOrder(#orderId, principal.userId)")
+    public MessageResponseDto cancelOrder(@PathVariable Long orderId) {
+        return orderService.cancelOrder(orderId);
+    }
 }

@@ -1,10 +1,13 @@
 package com.ecjtaneo.ticket_management_backend.order.internal.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 
 import com.ecjtaneo.ticket_management_backend.order.internal.dto.EventTierQuantityAggregate;
 import com.ecjtaneo.ticket_management_backend.order.internal.model.Order;
 import com.ecjtaneo.ticket_management_backend.order.internal.model.OrderStatus;
+
+import jakarta.persistence.LockModeType;
 
 import java.util.Optional;
 import java.util.List;
@@ -16,6 +19,7 @@ import org.springframework.data.repository.query.Param;
 public interface OrderRepository extends JpaRepository<Order, Long> {
     boolean existsByIdAndUserId(Long id, Long userId);
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
     @EntityGraph(attributePaths = { "items" })
     Optional<Order> findByIdAndStatus(Long id, OrderStatus status);
 

@@ -129,7 +129,21 @@ public class OrderService {
         return orderRepository.existsByIdAndUserId(orderId, userId);
     }
 
-    // TODO: Re implement cancelOrder method(single order not batch)
+    @Transactional
+    public MessageResponseDto cancelOrder(Long orderId) {
+        Order order = orderRepository.findByIdAndStatus(orderId, OrderStatus.PENDING)
+                .orElseThrow(() -> new ValidationException("Order not found or already cancelled"));
+
+        order.setStatus(OrderStatus.CANCELLED);
+        orderRepository.save(order);
+
+        List<EventTierQuantityAdjustment> adjustments = order.getItems().stream()
+                .map(item -> new EventTierQuantityAdjustment(item.getEventTierId(), item.getQuantity()))
+                .toList();
+        eventApi.batchDecrementEventTierSoldCount(adjustments);
+
+        return new MessageResponseDto("Order cancelled successfully");
+    }
 
     @Scheduled(fixedDelay = expirationCheckRateMs)
     @Transactional

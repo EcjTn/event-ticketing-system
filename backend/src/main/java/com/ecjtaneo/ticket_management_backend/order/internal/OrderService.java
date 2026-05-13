@@ -15,7 +15,10 @@ import org.springframework.stereotype.Service;
 
 import com.ecjtaneo.ticket_management_backend.event.EventApi;
 import com.ecjtaneo.ticket_management_backend.event.EventTierBasicInfo;
+import com.ecjtaneo.ticket_management_backend.event.EventTierQuantityAdjustment;
+import com.ecjtaneo.ticket_management_backend.order.OrderCreatedEvent;
 import com.ecjtaneo.ticket_management_backend.order.internal.dto.CreateOrderRequestDto;
+import com.ecjtaneo.ticket_management_backend.order.internal.dto.EventTierQuantityAggregate;
 import com.ecjtaneo.ticket_management_backend.order.internal.dto.OrderInfoResponseDto;
 import com.ecjtaneo.ticket_management_backend.order.internal.dto.OrderItemRequestDto;
 import com.ecjtaneo.ticket_management_backend.order.internal.mapper.OrderMapper;
@@ -24,10 +27,7 @@ import com.ecjtaneo.ticket_management_backend.order.internal.model.OrderItem;
 import com.ecjtaneo.ticket_management_backend.order.internal.model.OrderStatus;
 import com.ecjtaneo.ticket_management_backend.order.internal.repository.OrderItemRepository;
 import com.ecjtaneo.ticket_management_backend.order.internal.repository.OrderRepository;
-import com.ecjtaneo.ticket_management_backend.shared.TicketRestoreView;
 import com.ecjtaneo.ticket_management_backend.shared.dtos.MessageResponseDto;
-import com.ecjtaneo.ticket_management_backend.shared.events.EventTierStockRestoreEvent;
-import com.ecjtaneo.ticket_management_backend.shared.events.OrderCreatedEvent;
 import com.ecjtaneo.ticket_management_backend.shared.exceptions.ValidationException;
 
 import jakarta.transaction.Transactional;
@@ -152,7 +152,7 @@ public class OrderService {
 
         // cancel 500 expired orders and get the list of event tiers
         // and quantities to restore
-        List<TicketRestoreView> restoreViews = orderRepository.cancelExpiredOrders(
+        List<EventTierQuantityAggregate> restoreViews = orderRepository.cancelExpiredOrdersBatch(
                 OrderStatus.PENDING, OrderStatus.CANCELLED);
 
         if (restoreViews.isEmpty()) {
@@ -160,9 +160,11 @@ public class OrderService {
             return;
         }
 
-        for (TicketRestoreView ticketRestoreView : restoreViews) {
-            eventPublisher.publishEvent(new EventTierStockRestoreEvent(ticketRestoreView));
-        }
+        List<EventTierQuantityAdjustment> adjustments = restoreViews.stream()
+                .map(aggregate -> new EventTierQuantityAdjustment(aggregate.eventTierId(), aggregate.totalQuantity()))
+                .toList();
+
+        eventApi.batchDecrementEventTierSoldCount(adjustments);
     }
 
 }

@@ -1,16 +1,15 @@
 package com.ecjtaneo.ticket_management_backend.order.internal.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.ecjtaneo.ticket_management_backend.order.internal.dto.EventTierQuantityAggregate;
 import com.ecjtaneo.ticket_management_backend.order.internal.model.Order;
 import com.ecjtaneo.ticket_management_backend.order.internal.model.OrderStatus;
-import com.ecjtaneo.ticket_management_backend.shared.TicketRestoreView;
 
 import java.util.Optional;
 import java.util.List;
-import java.time.LocalDateTime;
 
 import org.springframework.data.jpa.repository.EntityGraph;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -43,7 +42,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             JOIN cancelled c ON c.id = oi.order_id
             GROUP BY oi.event_tier_id;
             """, nativeQuery = true)
-    List<TicketRestoreView> cancelExpiredOrders(@Param("prevStatus") OrderStatus prevStatus,
+    List<EventTierQuantityAggregate> cancelExpiredOrdersBatch(@Param("prevStatus") OrderStatus prevStatus,
             @Param("newStatus") OrderStatus newStatus);
 
 }

@@ -2,6 +2,7 @@ package com.ecjtaneo.ticket_management_backend.event.internal;
 
 import com.ecjtaneo.ticket_management_backend.event.EventApi;
 import com.ecjtaneo.ticket_management_backend.event.EventTierBasicInfo;
+import com.ecjtaneo.ticket_management_backend.event.EventTierQuantityAdjustment;
 import com.ecjtaneo.ticket_management_backend.event.internal.dto.CreateEventRequestDto;
 import com.ecjtaneo.ticket_management_backend.event.internal.dto.EventBasicInfoResponseDto;
 import com.ecjtaneo.ticket_management_backend.event.internal.dto.EventInfoResponseDto;
@@ -15,17 +16,16 @@ import com.ecjtaneo.ticket_management_backend.storage.StorageApi;
 import com.ecjtaneo.ticket_management_backend.shared.dtos.MessageResponseDto;
 import com.ecjtaneo.ticket_management_backend.shared.exceptions.ResourceNotFoundException;
 
-import com.ecjtaneo.ticket_management_backend.shared.events.EventTierStockRestoreEvent;
 import com.ecjtaneo.ticket_management_backend.shared.exceptions.ValidationException;
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.modulith.events.ApplicationModuleListener;
-
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.sql.PreparedStatement;
 import java.util.List;
 
 @Service
@@ -33,6 +33,7 @@ import java.util.List;
 public class EventService implements EventApi {
         private final EventRepository eventRepository;
         private final EventTierRepository eventTierRepository;
+        private final JdbcTemplate jdbcTemplate;
         private final EventMapper mapper;
         private final StorageApi storageApi;
 
@@ -111,11 +112,42 @@ public class EventService implements EventApi {
                 eventTierRepository.incrementSoldCount(tierId, quantity);
         }
 
-        @ApplicationModuleListener
-        public void onEventTierStockRestore(EventTierStockRestoreEvent event) {
-                eventTierRepository.decrementSoldCount(
-                                event.restoreView().eventTierId(),
-                                event.restoreView().totalQuantity());
+        // Batch update methods for releasing/incrementing sold counts
+        // I created 2 methods instead of 1 Generic method, it's for explicit API usage
+        // Of course it has its own trade-offs
+        // If the requirements change, I would have to update/refactor it
+
+        @Override
+        @Transactional
+        public void batchIncrementEventTierSoldCount(List<EventTierQuantityAdjustment> adjustments) {
+                String sql = """
+                                UPDATE event_tier
+                                SET sold_count = sold_count + ?
+                                WHERE id = ?
+                                """;
+
+                jdbcTemplate.batchUpdate(sql, adjustments, adjustments.size(),
+                                (PreparedStatement ps, EventTierQuantityAdjustment adjustment) -> {
+                                        ps.setInt(1, adjustment.quantity());
+                                        ps.setLong(2, adjustment.tierId());
+                                });
+        }
+
+        @Override
+        @Transactional
+        public void batchDecrementEventTierSoldCount(List<EventTierQuantityAdjustment> adjustments) {
+                String sql = """
+                                UPDATE event_tier
+                                SET sold_count = sold_count - ?
+                                WHERE id = ?
+                                """;
+
+                jdbcTemplate.batchUpdate(sql, adjustments, adjustments.size(),
+                                (PreparedStatement ps, EventTierQuantityAdjustment adjustment) -> {
+                                        ps.setInt(1, adjustment.quantity());
+                                        ps.setLong(2, adjustment.tierId());
+                                });
+
         }
 
 }

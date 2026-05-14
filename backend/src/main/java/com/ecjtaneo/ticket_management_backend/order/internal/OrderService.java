@@ -128,7 +128,7 @@ public class OrderService {
 
     @Transactional
     public MessageResponseDto cancelOrder(Long orderId) {
-        Order order = orderRepository.findByIdAndStatus(orderId, OrderStatus.PENDING)
+        Order order = orderRepository.findWithItemsByIdAndStatus(orderId, OrderStatus.PENDING)
                 .orElseThrow(() -> new ValidationException("Order not found or already cancelled"));
 
         order.setStatus(OrderStatus.CANCELLED);
@@ -149,7 +149,7 @@ public class OrderService {
 
         // cancel 100 expired orders and get the list of event tiers
         // and quantities to restore
-        List<EventTierQuantityAggregate> restoreViews = orderRepository.batchCancelExpiredOrders();
+        List<EventTierQuantityAggregate> restoreViews = orderRepository.batchCancelExpiredOrdersAndTierAgg();
 
         if (restoreViews.isEmpty()) {
             log.info("No expired orders found");

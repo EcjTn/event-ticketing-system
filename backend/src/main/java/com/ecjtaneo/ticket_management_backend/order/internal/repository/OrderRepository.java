@@ -20,7 +20,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @EntityGraph(attributePaths = { "items" })
-    Optional<Order> findByIdAndStatus(Long id, OrderStatus status);
+    Optional<Order> findWithItemsByIdAndStatus(Long id, OrderStatus status);
 
     // Trying out new method for batch cancelling
     @Query(value = """
@@ -45,6 +45,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             JOIN cancelled c ON c.id = oi.order_id
             GROUP BY oi.event_tier_id;
             """, nativeQuery = true)
-    List<EventTierQuantityAggregate> batchCancelExpiredOrders();
+    List<EventTierQuantityAggregate> batchCancelExpiredOrdersAndTierAgg();
 
 }

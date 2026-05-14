@@ -12,10 +12,9 @@ import org.springframework.stereotype.Service;
 
 import com.ecjtaneo.ticket_management_backend.event.EventApi;
 import com.ecjtaneo.ticket_management_backend.event.EventTierBasicInfo;
-import com.ecjtaneo.ticket_management_backend.event.EventTierQuantityAdjustment;
+import com.ecjtaneo.ticket_management_backend.event.AdjustSoldCountRequest;
 import com.ecjtaneo.ticket_management_backend.order.OrderCreatedEvent;
 import com.ecjtaneo.ticket_management_backend.order.internal.dto.CreateOrderRequestDto;
-import com.ecjtaneo.ticket_management_backend.order.internal.dto.EventTierQuantityAggregate;
 import com.ecjtaneo.ticket_management_backend.order.internal.dto.OrderInfoResponseDto;
 import com.ecjtaneo.ticket_management_backend.order.internal.dto.OrderItemRequestDto;
 import com.ecjtaneo.ticket_management_backend.order.internal.mapper.OrderMapper;
@@ -116,8 +115,8 @@ public class OrderService {
     }
 
     private void updateEventTierCounts(List<OrderItem> orderItems) {
-        List<EventTierQuantityAdjustment> adjustments = orderItems.stream()
-                .map(item -> new EventTierQuantityAdjustment(item.getEventTierId(), item.getQuantity()))
+        List<AdjustSoldCountRequest> adjustments = orderItems.stream()
+                .map(item -> new AdjustSoldCountRequest(item.getEventTierId(), item.getQuantity()))
                 .toList();
         eventApi.batchIncrementEventTierSoldCount(adjustments);
     }
@@ -133,8 +132,8 @@ public class OrderService {
 
         order.setStatus(OrderStatus.CANCELLED);
 
-        List<EventTierQuantityAdjustment> adjustments = order.getItems().stream()
-                .map(item -> new EventTierQuantityAdjustment(item.getEventTierId(), item.getQuantity()))
+        List<AdjustSoldCountRequest> adjustments = order.getItems().stream()
+                .map(item -> new AdjustSoldCountRequest(item.getEventTierId(), item.getQuantity()))
                 .toList();
         eventApi.batchDecrementEventTierSoldCount(adjustments);
 
@@ -148,15 +147,15 @@ public class OrderService {
 
         // cancel 100 expired orders and get the list of event tiers
         // and quantities to restore
-        List<EventTierQuantityAggregate> restoreViews = orderRepository.batchCancelExpiredOrdersAndTierAgg();
+        List<EventTierQuantityAggregateProjection> restoreViews = orderRepository.batchCancelExpiredOrdersAndAggregateTier();
 
         if (restoreViews.isEmpty()) {
             log.info("No expired orders found");
             return;
         }
 
-        List<EventTierQuantityAdjustment> adjustments = restoreViews.stream()
-                .map(aggregate -> new EventTierQuantityAdjustment(aggregate.eventTierId(), aggregate.totalQuantity()))
+        List<AdjustSoldCountRequest> adjustments = restoreViews.stream()
+                .map(aggregate -> new AdjustSoldCountRequest(aggregate.eventTierId(), aggregate.totalQuantity()))
                 .toList();
 
         eventApi.batchDecrementEventTierSoldCount(adjustments);

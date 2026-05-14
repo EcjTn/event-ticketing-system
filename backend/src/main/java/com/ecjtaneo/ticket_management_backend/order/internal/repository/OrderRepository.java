@@ -3,7 +3,7 @@ package com.ecjtaneo.ticket_management_backend.order.internal.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 
-import com.ecjtaneo.ticket_management_backend.order.internal.dto.EventTierQuantityAggregate;
+import com.ecjtaneo.ticket_management_backend.order.internal.EventTierQuantityAggregateProjection;
 import com.ecjtaneo.ticket_management_backend.order.internal.model.Order;
 import com.ecjtaneo.ticket_management_backend.order.internal.model.OrderStatus;
 
@@ -45,6 +45,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             JOIN cancelled c ON c.id = oi.order_id
             GROUP BY oi.event_tier_id;
             """, nativeQuery = true)
-    List<EventTierQuantityAggregate> batchCancelExpiredOrdersAndTierAgg();
+    List<EventTierQuantityAggregateProjection> batchCancelExpiredOrdersAndAggregateTier();
 
 }

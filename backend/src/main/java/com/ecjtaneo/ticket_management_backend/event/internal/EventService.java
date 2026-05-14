@@ -2,7 +2,7 @@ package com.ecjtaneo.ticket_management_backend.event.internal;
 
 import com.ecjtaneo.ticket_management_backend.event.EventApi;
 import com.ecjtaneo.ticket_management_backend.event.EventTierBasicInfo;
-import com.ecjtaneo.ticket_management_backend.event.EventTierQuantityAdjustment;
+import com.ecjtaneo.ticket_management_backend.event.AdjustSoldCountRequest;
 import com.ecjtaneo.ticket_management_backend.event.internal.dto.CreateEventRequestDto;
 import com.ecjtaneo.ticket_management_backend.event.internal.dto.EventBasicInfoResponseDto;
 import com.ecjtaneo.ticket_management_backend.event.internal.dto.EventInfoResponseDto;
@@ -113,7 +113,7 @@ class EventService implements EventApi {
 
         @Override
         @Transactional
-        public void batchIncrementEventTierSoldCount(List<EventTierQuantityAdjustment> adjustments) {
+        public void batchIncrementEventTierSoldCount(List<AdjustSoldCountRequest> adjustments) {
                 String sql = """
                                 UPDATE event_tier
                                 SET sold_count = sold_count + ?
@@ -121,7 +121,7 @@ class EventService implements EventApi {
                                 """;
 
                 jdbcTemplate.batchUpdate(sql, adjustments, adjustments.size(),
-                                (PreparedStatement ps, EventTierQuantityAdjustment adjustment) -> {
+                                (PreparedStatement ps, AdjustSoldCountRequest adjustment) -> {
                                         ps.setInt(1, adjustment.quantity());
                                         ps.setLong(2, adjustment.tierId());
                                 });
@@ -129,7 +129,7 @@ class EventService implements EventApi {
 
         @Override
         @Transactional
-        public void batchDecrementEventTierSoldCount(List<EventTierQuantityAdjustment> adjustments) {
+        public void batchDecrementEventTierSoldCount(List<AdjustSoldCountRequest> adjustments) {
                 String sql = """
                                 UPDATE event_tier
                                 SET sold_count = sold_count - ?
@@ -137,7 +137,7 @@ class EventService implements EventApi {
                                 """;
 
                 jdbcTemplate.batchUpdate(sql, adjustments, adjustments.size(),
-                                (PreparedStatement ps, EventTierQuantityAdjustment adjustment) -> {
+                                (PreparedStatement ps, AdjustSoldCountRequest adjustment) -> {
                                         ps.setInt(1, adjustment.quantity());
                                         ps.setLong(2, adjustment.tierId());
                                 });

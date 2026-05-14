@@ -19,12 +19,12 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class UserService implements UserApi {
+class UserService implements UserApi {
     private final UserRepository repository;
     private final UserMapper mapper;
     private final StorageApi storageApi;
 
-    public UserInfoResponseDto getUserInfo(Long userId) {
+    UserInfoResponseDto getUserInfo(Long userId) {
         User user = repository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         return mapper.toUserInfoResponseDto(user);
@@ -37,7 +37,7 @@ public class UserService implements UserApi {
         return mapper.toBasicInfo(user);
     }
 
-    public MessageResponseDto changeProfilePhoto(MultipartFile file, Long userId) throws IOException {
+    MessageResponseDto changeProfilePhoto(MultipartFile file, Long userId) throws IOException {
         User user = repository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         String fileUrl = storageApi.uploadUserProfilePhoto(file, userId);

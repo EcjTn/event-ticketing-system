@@ -14,16 +14,16 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
-public class UserController {
+class UserController {
     private final UserService service;
 
     @GetMapping("/me")
-    public UserInfoResponseDto getUserInfo(@CurrentUserId Long userId) {
+    UserInfoResponseDto getUserInfo(@CurrentUserId Long userId) {
         return service.getUserInfo(userId);
     }
 
     @PatchMapping("/me/profile-photo")
-    public MessageResponseDto changeProfilePhoto(@RequestParam("file") MultipartFile file, @CurrentUserId Long userId) throws IOException {
+    MessageResponseDto changeProfilePhoto(@RequestParam("file") MultipartFile file, @CurrentUserId Long userId) throws IOException {
         return service.changeProfilePhoto(file, userId);
     }
 }

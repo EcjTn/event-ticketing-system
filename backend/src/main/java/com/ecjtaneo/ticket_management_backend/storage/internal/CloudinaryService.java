@@ -3,6 +3,7 @@ package com.ecjtaneo.ticket_management_backend.storage.internal;
 import com.cloudinary.Cloudinary;
 import com.ecjtaneo.ticket_management_backend.shared.exceptions.ValidationException;
 import com.ecjtaneo.ticket_management_backend.storage.StorageApi;
+import lombok.RequiredArgsConstructor;
 import org.apache.tika.Tika;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -12,14 +13,11 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class CloudinaryService implements StorageApi {
+@RequiredArgsConstructor
+class CloudinaryService implements StorageApi {
     private final Cloudinary cloudinary;
     private final Tika tika = new Tika();
     private final List<String> allowedMimeTypes = List.of("image/jpeg", "image/png", "image/webp");
-
-    public CloudinaryService(Cloudinary cloudinary) {
-        this.cloudinary = cloudinary;
-    }
 
     public void validateFile(MultipartFile file) throws IOException {
         String detectedMimeType = tika.detect(file.getInputStream());

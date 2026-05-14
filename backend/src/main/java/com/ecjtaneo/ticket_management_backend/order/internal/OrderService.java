@@ -44,7 +44,7 @@ public class OrderService {
     private final EventApi eventApi;
 
     @Transactional
-    public OrderInfoResponseDto createOrder(CreateOrderRequestDto request, Long userId) {
+    OrderInfoResponseDto createOrder(CreateOrderRequestDto request, Long userId) {
         eventApi.validateEventIsPublished(request.eventId());
 
         List<OrderItem> orderItems = processOrderItems(request.items());

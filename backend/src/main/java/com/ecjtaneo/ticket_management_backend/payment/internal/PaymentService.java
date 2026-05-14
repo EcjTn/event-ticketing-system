@@ -10,11 +10,11 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class PaymentService {
+class PaymentService {
     private final PaymentRepository paymentRepository;
 
     @ApplicationModuleListener()
-    public void onOrderCreated(OrderCreatedEvent event) {
+    void onOrderCreated(OrderCreatedEvent event) {
         Payment payment = new Payment();
         payment.setEventId(event.eventId());
         payment.setOrderId(event.orderId());

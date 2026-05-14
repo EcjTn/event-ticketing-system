@@ -17,23 +17,23 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/events")
 @RequiredArgsConstructor
-public class EventController {
+class EventController {
     private final EventService service;
 
     @GetMapping("/{id}")
-    public EventInfoResponseDto getEventInfoById(@PathVariable Long id) {
+    EventInfoResponseDto getEventInfoById(@PathVariable Long id) {
         return service.getEventInfoById(id);
     }
 
     @GetMapping
-    public List<EventBasicInfoResponseDto> getEvents(@RequestParam(name = "cursor", required = false) Long lastSeenId) {
+    List<EventBasicInfoResponseDto> getEvents(@RequestParam(name = "cursor", required = false) Long lastSeenId) {
         if (lastSeenId == null)
             return service.getEvents();
         return service.getEvents(lastSeenId);
     }
 
     @PostMapping
-    public MessageResponseDto createEvent(@RequestPart("data") @Valid CreateEventRequestDto dto,
+    MessageResponseDto createEvent(@RequestPart("data") @Valid CreateEventRequestDto dto,
             @RequestPart("image") MultipartFile image, @CurrentUserId Long userId) throws IOException {
         return service.createEvent(dto, image, userId);
     }

@@ -19,17 +19,17 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/orders")
 @RequiredArgsConstructor
-public class OrderController {
+class OrderController {
     private final OrderService orderService;
 
     @PostMapping
-    public OrderInfoResponseDto createOrder(@RequestBody CreateOrderRequestDto request, @CurrentUserId Long userId) {
+    OrderInfoResponseDto createOrder(@RequestBody CreateOrderRequestDto request, @CurrentUserId Long userId) {
         return orderService.createOrder(request, userId);
     }
 
     @PatchMapping("/{orderId}/cancel")
     @PreAuthorize("hasAuthority('ADMIN') or @orderService.canCancelOrder(#orderId, principal.userId)")
-    public MessageResponseDto cancelOrder(@PathVariable Long orderId) {
+    MessageResponseDto cancelOrder(@PathVariable Long orderId) {
         return orderService.cancelOrder(orderId);
     }
 }

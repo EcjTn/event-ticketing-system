@@ -30,24 +30,24 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class EventService implements EventApi {
+class EventService implements EventApi {
         private final EventRepository eventRepository;
         private final EventTierRepository eventTierRepository;
         private final JdbcTemplate jdbcTemplate;
         private final EventMapper mapper;
         private final StorageApi storageApi;
 
-        public List<EventBasicInfoResponseDto> getEvents() {
+        List<EventBasicInfoResponseDto> getEvents() {
                 return mapper.toEventBasicInfoDtoList(
                                 eventRepository.findTop10ByStatusOrderByIdDesc(EventStatus.PUBLISHED));
         }
 
-        public List<EventBasicInfoResponseDto> getEvents(Long lastSeenId) {
+        List<EventBasicInfoResponseDto> getEvents(Long lastSeenId) {
                 return mapper.toEventBasicInfoDtoList(
                                 eventRepository.findTop10ByIdLessThanOrderByIdDesc(lastSeenId));
         }
 
-        public EventInfoResponseDto getEventInfoById(Long id) {
+        EventInfoResponseDto getEventInfoById(Long id) {
                 Event event = eventRepository.findWithTiersById(id)
                                 .orElseThrow(() -> new ResourceNotFoundException("Event not found with id: " + id));
 
@@ -63,7 +63,7 @@ public class EventService implements EventApi {
         }
 
         @Transactional
-        public MessageResponseDto createEvent(CreateEventRequestDto dto, MultipartFile image, Long createdBy)
+        MessageResponseDto createEvent(CreateEventRequestDto dto, MultipartFile image, Long createdBy)
                         throws IOException {
                 Event event = mapper.toEvent(dto);
                 event.setCreatedBy(createdBy);

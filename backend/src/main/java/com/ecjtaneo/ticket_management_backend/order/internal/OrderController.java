@@ -28,7 +28,7 @@ class OrderController {
     }
 
     @PatchMapping("/{orderId}/cancel")
-    @PreAuthorize("hasAuthority('ADMIN') or @orderService.canCancelOrder(#orderId, principal.userId)")
+    @PreAuthorize("hasAuthority('ADMIN') or @orderService.ownsOrder(#orderId, principal.userId)")
     MessageResponseDto cancelOrder(@PathVariable Long orderId) {
         return orderService.cancelOrder(orderId);
     }

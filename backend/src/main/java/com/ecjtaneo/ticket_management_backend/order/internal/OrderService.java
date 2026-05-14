@@ -122,7 +122,7 @@ public class OrderService {
         eventApi.batchIncrementEventTierSoldCount(adjustments);
     }
 
-    public boolean canCancelOrder(Long orderId, Long userId) {
+    public boolean ownsOrder(Long orderId, Long userId) {
         return orderRepository.existsByIdAndUserId(orderId, userId);
     }
 
@@ -132,7 +132,6 @@ public class OrderService {
                 .orElseThrow(() -> new ValidationException("Order not found or already cancelled"));
 
         order.setStatus(OrderStatus.CANCELLED);
-        orderRepository.save(order);
 
         List<EventTierQuantityAdjustment> adjustments = order.getItems().stream()
                 .map(item -> new EventTierQuantityAdjustment(item.getEventTierId(), item.getQuantity()))

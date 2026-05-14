@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ecjtaneo.ticket_management_backend.order.internal.dto.CreateOrderRequestDto;
 import com.ecjtaneo.ticket_management_backend.order.internal.dto.OrderInfoResponseDto;
 import com.ecjtaneo.ticket_management_backend.shared.annotations.CurrentUserId;
-//import com.ecjtaneo.ticket_management_backend.shared.dtos.MessageResponseDto;
 import com.ecjtaneo.ticket_management_backend.shared.dtos.MessageResponseDto;
 
 import lombok.RequiredArgsConstructor;

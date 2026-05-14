@@ -17,7 +17,6 @@ import com.ecjtaneo.ticket_management_backend.order.OrderCreatedEvent;
 import com.ecjtaneo.ticket_management_backend.order.internal.dto.CreateOrderRequestDto;
 import com.ecjtaneo.ticket_management_backend.order.internal.dto.OrderInfoResponseDto;
 import com.ecjtaneo.ticket_management_backend.order.internal.dto.OrderItemRequestDto;
-import com.ecjtaneo.ticket_management_backend.order.internal.mapper.OrderMapper;
 import com.ecjtaneo.ticket_management_backend.order.internal.model.Order;
 import com.ecjtaneo.ticket_management_backend.order.internal.model.OrderItem;
 import com.ecjtaneo.ticket_management_backend.order.internal.model.OrderStatus;
@@ -35,7 +34,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class OrderService {
     private final long expirationCheckRateMs = 600_000; // 10 minutes
-    private final int maxOrderItemsPerOrder = 5;
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final ApplicationEventPublisher eventPublisher;
@@ -69,6 +67,7 @@ public class OrderService {
                 .toList();
 
         List<OrderItem> orderItems = new ArrayList<>();
+        int maxOrderItemsPerOrder = 5;
 
         for (OrderItemRequestDto item : sorted) {
 

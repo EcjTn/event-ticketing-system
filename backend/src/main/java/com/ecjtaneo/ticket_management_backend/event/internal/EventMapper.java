@@ -1,4 +1,4 @@
-package com.ecjtaneo.ticket_management_backend.event.internal.mapper;
+package com.ecjtaneo.ticket_management_backend.event.internal;
 
 import com.ecjtaneo.ticket_management_backend.event.EventTierBasicInfo;
 import com.ecjtaneo.ticket_management_backend.event.internal.dto.CreateEventRequestDto;

@@ -6,7 +6,6 @@ import com.ecjtaneo.ticket_management_backend.event.AdjustSoldCountRequest;
 import com.ecjtaneo.ticket_management_backend.event.internal.dto.CreateEventRequestDto;
 import com.ecjtaneo.ticket_management_backend.event.internal.dto.EventBasicInfoResponseDto;
 import com.ecjtaneo.ticket_management_backend.event.internal.dto.EventInfoResponseDto;
-import com.ecjtaneo.ticket_management_backend.event.internal.mapper.EventMapper;
 import com.ecjtaneo.ticket_management_backend.event.internal.model.Event;
 import com.ecjtaneo.ticket_management_backend.event.internal.model.EventStatus;
 import com.ecjtaneo.ticket_management_backend.event.internal.model.EventTier;

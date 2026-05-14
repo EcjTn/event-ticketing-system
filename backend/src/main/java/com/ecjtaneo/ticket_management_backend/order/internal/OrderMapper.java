@@ -1,4 +1,4 @@
-package com.ecjtaneo.ticket_management_backend.order.internal.mapper;
+package com.ecjtaneo.ticket_management_backend.order.internal;
 
 import org.mapstruct.Mapper;
 

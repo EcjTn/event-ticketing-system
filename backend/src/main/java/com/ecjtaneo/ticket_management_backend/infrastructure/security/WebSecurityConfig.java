@@ -8,6 +8,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -25,14 +26,14 @@ class WebSecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http) {
         return http
                 .cors(Customizer.withDefaults())
-                .csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
+                .csrf(CsrfConfigurer::spa)
 
                 .formLogin(l -> l
                         .loginProcessingUrl("/auth/login")
-                        .successHandler((request, response, authentication) -> {
+                        .successHandler((request, response, ex) -> {
                             response.setStatus(HttpServletResponse.SC_OK);
                         })
-                        .failureHandler((request, response, authentication) -> {
+                        .failureHandler((request, response, ex) -> {
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                         }))
                 .logout(l -> l

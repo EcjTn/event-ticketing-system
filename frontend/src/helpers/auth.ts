@@ -1,10 +1,11 @@
+import type IUser from '../types/IUser'
 import api from './api'
 
 
 export async function loginAndFetchUser(
   username: string,
   password: string,
-): Promise<Record<string, unknown>> {
+): Promise<Record<string, IUser>> {
 
   const body = new URLSearchParams({
     username: username.trim(),

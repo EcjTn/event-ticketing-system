@@ -5,7 +5,7 @@ import java.util.List;
 public interface EventApi {
     public void validateEventIsPublished(Long id);
 
-    public EventTierBasicInfo getEventTierInfo(Long id);
+    public EventTierBasicInfo lockEventTierForUpdate(Long id);
 
     public void batchDecrementEventTierSoldCount(List<AdjustSoldCountRequest> adjustments);
 

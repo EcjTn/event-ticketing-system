@@ -96,11 +96,15 @@ class EventService implements EventApi {
 
         @Override
         @Transactional
-        public EventTierBasicInfo getEventTierInfo(Long id) {
+        public EventTierBasicInfo lockEventTierForUpdate(Long id) {
                 // Pessimistic Lock the event tier for update to prevent race conditions
                 // Lock is released when the caller's transaction ends (order service)
-                EventTier eventTier = eventTierRepository.findByIdAndAvailable(id)
+                EventTier eventTier = eventTierRepository.findByIdForUpdate(id)
                                 .orElseThrow(() -> new ResourceNotFoundException("Event tier not found"));
+
+                if(eventTier.getSoldCount() >= eventTier.getQuantity()) {
+                        throw new OutOfStockException("Event tier " + eventTier.getTier() + " is out of stock");
+                }
 
                 return mapper.toEventTierBasicInfo(eventTier);
         }

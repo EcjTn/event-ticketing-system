@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Lock, User, ArrowRight } from 'lucide-react'
-
-const LOGIN_API = import.meta.env.VITE_LOGIN_API_URL ?? '/login'
+import { Button } from '../components/Button'
+import { loginAndFetchUser } from '../helpers/auth'
 
 function Login() {
   const navigate = useNavigate()
@@ -16,40 +16,25 @@ function Login() {
     setError('')
     setIsSubmitting(true)
 
-    const body = new URLSearchParams({
-      username: username.trim(),
-      password: password.trim(),
-    })
-
     try {
-      const response = await fetch(LOGIN_API, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: body.toString(),
-        credentials: 'include',
-      })
-
-      if (!response.ok) {
-        const message = await response.text()
-        setError(message || 'Invalid username or password')
-        return
-      }
-
+      await loginAndFetchUser(username, password)
       navigate('/events')
     } catch (err) {
-      setError('Unable to connect to the server. Please try again.')
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Unable to connect to the server. Please try again.',
+      )
     } finally {
       setIsSubmitting(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center px-4 py-8">
-      <div className="w-full max-w-md rounded-3xl border border-slate-800 bg-slate-900/95 p-8 shadow-2xl shadow-slate-950/40">
+    <div className="min-h-screen flex items-center justify-center px-4 py-8">
+      <div className="w-full max-w-md rounded-3xl border border-navy-border bg-navy-card p-8 shadow-2xl shadow-black/40">
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 inline-flex h-16 w-16 items-center justify-center rounded-3xl bg-cyan-500 text-slate-950">
+          <div className="mx-auto mb-4 inline-flex h-16 w-16 items-center justify-center rounded-3xl bg-mist text-navy-bg">
             <ArrowRight className="h-8 w-8" />
           </div>
           <h1 className="text-3xl font-semibold tracking-tight">Login to your account</h1>
@@ -59,7 +44,7 @@ function Login() {
         <form className="space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-2">
             <label className="text-sm font-medium text-slate-300" htmlFor="username">Username</label>
-            <div className="flex items-center gap-3 rounded-2xl border border-slate-800 bg-slate-950/80 px-4 py-3 focus-within:border-cyan-500 focus-within:ring-1 focus-within:ring-cyan-500">
+            <div className="flex items-center gap-3 rounded-2xl border border-navy-border bg-navy-bg px-4 py-3 focus-within:border-mist focus-within:ring-1 focus-within:ring-mist">
               <User className="h-5 w-5 text-slate-400" />
               <input
                 id="username"
@@ -77,7 +62,7 @@ function Login() {
 
           <div className="space-y-2">
             <label className="text-sm font-medium text-slate-300" htmlFor="password">Password</label>
-            <div className="flex items-center gap-3 rounded-2xl border border-slate-800 bg-slate-950/80 px-4 py-3 focus-within:border-cyan-500 focus-within:ring-1 focus-within:ring-cyan-500">
+            <div className="flex items-center gap-3 rounded-2xl border border-navy-border bg-navy-bg px-4 py-3 focus-within:border-mist focus-within:ring-1 focus-within:ring-mist">
               <Lock className="h-5 w-5 text-slate-400" />
               <input
                 id="password"
@@ -97,13 +82,9 @@ function Login() {
             <p className="rounded-2xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">{error}</p>
           ) : null}
 
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-cyan-500 px-4 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {isSubmitting ? 'Logging in...' : 'Login'}
-          </button>
+          <Button type="submit" isLoading={isSubmitting}>
+            Login
+          </Button>
         </form>
       </div>
     </div>

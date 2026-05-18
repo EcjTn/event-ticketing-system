@@ -1,1 +1,27 @@
 @import "tailwindcss";
+
+/*
+ * Global theme overrides
+ * Background: deep navy / black-blue (#0a0f1e) — similar to Tailwind's slate-950
+ * Mist accent: soft blue-grey for buttons (#b0c4d8)
+ */
+
+@theme {
+  --color-navy-bg: #0a0f1e;
+  --color-navy-card: #0f1629;
+  --color-navy-border: #1a2340;
+  --color-mist: #a7f3d0;
+  --color-mist-hover: #6ee7b7;
+  --color-mist-pressed: #34d399;
+}
+
+/* ── Global background ─────────────────────────────── */
+html,
+body,
+#root {
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-navy-bg);
+  color: #e2e8f0; /* slate-200 */
+}

@@ -6,8 +6,7 @@ import java.math.BigDecimal;
 public record EventTierInfoResponseDto(
     Long id,
     TicketTier tier,
-    BigDecimal price,
-    Integer quantity
+    BigDecimal price
 ) {
     
 }

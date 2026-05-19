@@ -12,7 +12,6 @@ import org.springframework.security.config.annotation.web.configurers.CsrfConfig
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -54,7 +53,7 @@ class WebSecurityConfig {
                         .anyRequest().authenticated())
 
                 .exceptionHandling(exception -> exception
-                        .accessDeniedHandler((request, response, accessDeniedException) -> {)
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
                             System.out.println("Access denied: " + accessDeniedException.getMessage());
 
                             response.sendError(HttpServletResponse.SC_FORBIDDEN);

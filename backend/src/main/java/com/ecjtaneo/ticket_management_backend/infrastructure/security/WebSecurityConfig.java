@@ -54,9 +54,21 @@ class WebSecurityConfig {
                         .anyRequest().authenticated())
 
                 .exceptionHandling(exception -> exception
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {)
+                            System.out.println("Access denied: " + accessDeniedException.getMessage());
+
+                            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+                            response.setContentType("application/json");
+                            response.getWriter().write("{\"message\":\"Access denied: " + accessDeniedException.getMessage() + "\"}");
+
+                        })
+
                         .authenticationEntryPoint((request, response, authException) -> {
                             System.out.println("Unauthorized access attempt: " + authException.getMessage());
-                            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+
+                            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json");
+                            response.getWriter().write("{\"message\":\"Unauthorized: " + authException.getMessage() + "\"}");
                         })
                 )
                 .build();

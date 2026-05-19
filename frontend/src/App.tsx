@@ -7,7 +7,7 @@ import api from './helpers/api'
 function App() {
 
   useEffect(() => {
-    api.get('/') //get csrf token
+    api.get('/events') //just to get csrf token
       .catch((error) => {
         console.warn('Failed to fetch initial CSRF token:', error.message)
       })

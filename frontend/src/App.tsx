@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import Login from './pages/Login'
 import NotFound from './pages/NotFound'
+import Playground from './pages/Playground'
 import api from './helpers/api'
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
     <Routes>
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/playground" element={<Playground />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   )

@@ -30,6 +30,18 @@ function EventList({ events }: EventListProps) {
                         <h3 className="text-xl font-bold text-mist group-hover:text-mist-hover transition-colors">
                             {event.name}
                         </h3>
+                        <div className="flex items-center justify-between text-xs text-slate-500 mb-4">
+                            <span className="flex items-center">
+                                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                {event.venue}
+                            </span>
+                        </div>
+                        <p className="text-sm text-slate-400 mb-4">{event.description}</p>
+                        <div className="flex justify-end items-center mt-auto pt-4 border-t border-navy-border">
+                            <button className="px-6 py-2 bg-cyan-800 hover:bg-cyan-900 text-navy transition-colors rounded-full font-bold text-sm">
+                                View
+                            </button>
+                        </div>
                     </div>
                 </div>
             ))}

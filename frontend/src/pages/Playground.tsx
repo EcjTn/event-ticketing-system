@@ -5,17 +5,23 @@ const MOCK_EVENTS: IEventBasic[] = [
     {
         id: 1,
         name: 'Tech Conference 2026',
-        imageUrl: 'https://dl-cf.splento.com/cdn/2022/01/28/event.jpg'
+        imageUrl: 'https://dl-cf.splento.com/cdn/2022/01/28/event.jpg',
+        venue: 'New York, NY',
+        description: 'The best tech conference of 2026. '
     },
     {
         id: 2,
         name: 'Local Music Festival',
-        imageUrl: 'https://www.cavinelizabeth.com/wp-content/uploads/2023/03/JCF_CavinElizabeth_4.10.22_43-1500x1125.jpg'
+        imageUrl: 'https://www.cavinelizabeth.com/wp-content/uploads/2023/03/JCF_CavinElizabeth_4.10.22_43-1500x1125.jpg',
+        venue: 'San Francisco, CA',
+        description: 'Music for hype and fun'
     },
     {
         id: 3,
         name: 'Startup Pitch Night',
-        imageUrl: 'https://images.squarespace-cdn.com/content/v1/604a246ec98ac75732165334/1669222048321-HPLTC2ZYKDK1BSA98HPS/backdrop-ideas-corporate-events.jpg'
+        imageUrl: 'https://images.squarespace-cdn.com/content/v1/604a246ec98ac75732165334/1669222048321-HPLTC2ZYKDK1BSA98HPS/backdrop-ideas-corporate-events.jpg',
+        venue: 'Los Angeles, CA',
+        description: 'Pitch for funding'
     }
 ];
 

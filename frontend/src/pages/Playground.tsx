@@ -1,5 +1,8 @@
+import EventCard from '../components/EventCard';
 import EventList from '../components/EventList';
+import type IEvent from '../types/IEvent';
 import type IEventBasic from '../types/IEventBasic';
+import type IEventTier from '../types/IEventTier';
 
 const MOCK_EVENTS: IEventBasic[] = [
     {
@@ -25,11 +28,49 @@ const MOCK_EVENTS: IEventBasic[] = [
     }
 ];
 
+const MOCK_EVENT_TIERS: IEventTier[] = [
+    {
+        id: 1,
+        tier: 'GENERAL',
+        price: 100,
+    },
+    {
+        id: 2,
+        tier: 'FLOOR',
+        price: 50,
+    },
+    {
+        id: 3,
+        tier: 'VIP',
+        price: 200,
+    }
+]
+
+const MOCK_EVENT: IEvent = {
+    id: 1,
+    name: 'Tech Conference 2026',
+    date: '2026-12-31',
+    imageUrl: 'https://dl-cf.splento.com/cdn/2022/01/28/event.jpg',
+    venue: 'New York, NY',
+    description: 'The best tech conference of 2026. ',
+    status: 'PUBLISHED',
+    createdAt: '2026-01-01',
+    tiers: MOCK_EVENT_TIERS,
+    availableTickets: 300,
+}
+
+
 function Playground() {
     return (
         <div className="p-8 min-h-screen">
             <h1 className="text-3xl font-bold mb-8 text-mist">Component Playground</h1>
             <EventList events={MOCK_EVENTS} />
+
+            <div className='mt-25'>
+                <h2 className="text-3xl font-bold mb-8 text-mist">Event Card</h2>
+                <EventCard event={MOCK_EVENT} />
+            </div>
+
         </div>
     );
 }

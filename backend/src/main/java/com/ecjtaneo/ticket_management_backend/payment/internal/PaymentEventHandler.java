@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-class PaymentService {
+class PaymentEventHandler {
     private final PaymentRepository paymentRepository;
 
     @ApplicationModuleListener()

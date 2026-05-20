@@ -15,7 +15,7 @@
   --color-mist-pressed: #34d399;
 }
 
-/* ── Global background ─────────────────────────────── */
+/* ── Global background & typography ────────────────── */
 html,
 body,
 #root {
@@ -23,5 +23,16 @@ body,
   margin: 0;
   padding: 0;
   background-color: var(--color-navy-bg);
-  color: #e2e8f0; /* slate-200 */
+  color: #e2e8f0;
+  /* slate-200 */
+  font-family: 'Geist Mono', monospace;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Geist Sans', sans-serif;
 }

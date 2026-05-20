@@ -1,5 +1,6 @@
 package com.ecjtaneo.ticket_management_backend.payment.internal;
 
+import com.ecjtaneo.ticket_management_backend.payment.internal.model.PaymentStatus;
 import com.stripe.StripeClient;
 import org.springframework.modulith.events.ApplicationModuleListener;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ class PaymentEventHandler {
     @ApplicationModuleListener()
     void onOrderCreated(OrderCreatedEvent event) {
         Payment payment = new Payment();
+        payment.setStatus(PaymentStatus.PENDING);
         payment.setEventId(event.eventId());
         payment.setOrderId(event.orderId());
         payment.setUserId(event.userId());

@@ -1,0 +1,2 @@
+ALTER TYPE payment_status ADD VALUE 'PENDING';
+ALTER TYPE payment_status ADD VALUE 'CANCELLED';

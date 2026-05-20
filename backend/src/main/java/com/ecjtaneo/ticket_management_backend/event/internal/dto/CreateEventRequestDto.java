@@ -1,5 +1,6 @@
 package com.ecjtaneo.ticket_management_backend.event.internal.dto;
 
+import com.ecjtaneo.ticket_management_backend.shared.enums.TicketTier;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -16,5 +17,5 @@ public record CreateEventRequestDto(
 
         String description,
 
-        @NotNull(message = "Event tiers are required") @Size(min = 1, message = "At least one event tier is required") @Valid List<CreateEventTierRequestDto> tiers) {
+        @NotNull(message = "Event tiers are required") @Size(min = 1, max = TicketTier.COUNT, message = "At least one event tier is required") @Valid List<CreateEventTierRequestDto> tiers) {
 }

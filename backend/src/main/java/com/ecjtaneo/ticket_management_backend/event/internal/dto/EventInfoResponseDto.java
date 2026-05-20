@@ -17,8 +17,6 @@ public class EventInfoResponseDto{
     String description;
     String imageUrl;
     EventStatus status;
-    LocalDateTime createdAt;
     List<EventTierInfoResponseDto> tiers;
     Integer availableTickets;
-    
 }

@@ -10,3 +10,4 @@ still in development.
 - Flyway
 - Cloudinary
 - Apache Tika
+- Stripe

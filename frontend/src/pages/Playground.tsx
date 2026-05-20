@@ -33,16 +33,19 @@ const MOCK_EVENT_TIERS: IEventTier[] = [
         id: 1,
         tier: 'GENERAL',
         price: 100,
+        quantity: 100,
     },
     {
         id: 2,
         tier: 'FLOOR',
         price: 50,
+        quantity: 100,
     },
     {
         id: 3,
         tier: 'VIP',
         price: 200,
+        quantity: 100,
     }
 ]
 
@@ -54,7 +57,6 @@ const MOCK_EVENT: IEvent = {
     venue: 'New York, NY',
     description: 'The best tech conference of 2026. ',
     status: 'PUBLISHED',
-    createdAt: '2026-01-01',
     tiers: MOCK_EVENT_TIERS,
     availableTickets: 300,
 }

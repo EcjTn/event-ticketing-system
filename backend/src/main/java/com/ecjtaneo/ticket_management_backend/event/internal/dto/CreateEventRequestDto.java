@@ -17,5 +17,5 @@ public record CreateEventRequestDto(
 
         String description,
 
-        @NotNull(message = "Event tiers are required") @Size(min = 1, max = TicketTier.COUNT, message = "At least one event tier is required") @Valid List<CreateEventTierRequestDto> tiers) {
+        @NotNull(message = "Event tiers are required") @Size(min = 1, max = TicketTier.COUNT, message = "At least one event tier is required and max three") @Valid List<CreateEventTierRequestDto> tiers) {
 }

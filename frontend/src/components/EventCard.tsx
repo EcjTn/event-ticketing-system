@@ -46,10 +46,10 @@ function EventCard({ event }: EventCardProps) {
                         {event.availableTickets} available
                     </span>
                 </div>
-                <div className="flex justify-end items-center mt-auto pt-4 border-t border-navy-border">
+                <div className="flex gap-5 justify-center items-center mt-auto pt-4 border-t border-navy-border">
                     {event.tiers.map((tier) => (
                         <button key={tier.id} className="px-6 py-2 bg-cyan-800 hover:bg-cyan-900 text-navy transition-colors rounded-full font-bold text-sm">
-                            {tier.tier}: ${tier.price}
+                            {tier.tier}: ${tier.price} ({tier.quantity} left)
                         </button>
                     ))}
                 </div>

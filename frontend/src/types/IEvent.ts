@@ -8,7 +8,6 @@ export default interface IEvent {
     description: string
     imageUrl: string
     status: string
-    createdAt: string
     tiers: IEventTier[]
     availableTickets: number
 }

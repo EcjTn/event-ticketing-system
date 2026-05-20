@@ -39,7 +39,7 @@ function EventList({ events }: EventListProps) {
                         <p className="text-sm text-slate-400 mb-4">{event.description}</p>
                         <div className="flex justify-end items-center mt-auto pt-4 border-t border-navy-border">
                             <button className="px-6 py-2 bg-cyan-800 hover:bg-cyan-900 text-navy transition-colors rounded-full font-bold text-sm">
-                                View
+                                View Details
                             </button>
                         </div>
                     </div>

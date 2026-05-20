@@ -36,6 +36,9 @@ public class EventTier {
     
     @Column(name = "sold_count", nullable = false)
     private Integer soldCount = 0;
+
+    @Column(nullable = false)
+    private String description;
     
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();

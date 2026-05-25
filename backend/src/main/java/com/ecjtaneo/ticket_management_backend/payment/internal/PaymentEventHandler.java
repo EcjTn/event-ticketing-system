@@ -22,7 +22,6 @@ class PaymentEventHandler {
     void onOrderCreated(OrderCreatedEvent event) {
         Payment payment = new Payment();
         payment.setStatus(PaymentStatus.PENDING);
-        payment.setEventId(event.eventId());
         payment.setOrderId(event.orderId());
         payment.setUserId(event.userId());
         payment.setAmount(event.amount());

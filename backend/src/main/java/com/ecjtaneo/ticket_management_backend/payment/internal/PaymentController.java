@@ -1,5 +1,6 @@
 package com.ecjtaneo.ticket_management_backend.payment.internal;
 
+import com.stripe.exception.StripeException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,8 +14,8 @@ public class PaymentController {
     private final PaymentService paymentService;
 
     @GetMapping("/{orderId}")
-    PaymentResponseDto getPaymentInfoByOrderId(@PathVariable Long orderId) {
-        return paymentService.getPaymentInfoByOrderId(orderId);
+    PaymentResponseDto getPaymentInfoByOrderId(@PathVariable Long orderId) throws StripeException {
+        return paymentService.getPaymentInfoByOrderIdAndValid(orderId);
     }
 
 }

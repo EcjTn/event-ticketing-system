@@ -16,7 +16,6 @@ class PaymentEventHandler {
     private final PaymentRepository paymentRepository;
     private final StripeClient stripeClient;
 
-    //TODO: Columns to add in Payment entity: paymentIntentId, clientSecret, currency
     //TODO: Create payment intent with Stripe API and save the payment info to the database
     @ApplicationModuleListener()
     void onOrderCreated(OrderCreatedEvent event) {

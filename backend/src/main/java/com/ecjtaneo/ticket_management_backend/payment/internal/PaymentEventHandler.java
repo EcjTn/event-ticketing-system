@@ -1,6 +1,7 @@
 package com.ecjtaneo.ticket_management_backend.payment.internal;
 
 import com.ecjtaneo.ticket_management_backend.payment.internal.model.PaymentStatus;
+import com.ecjtaneo.ticket_management_backend.shared.events.OrderCancelledEvent;
 import com.stripe.StripeClient;
 import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
@@ -19,7 +20,9 @@ import lombok.RequiredArgsConstructor;
 class PaymentEventHandler {
     private final PaymentRepository paymentRepository;
     private final StripeClient stripeClient;
+    private final PaymentService paymentService;
 
+    //TODO: transfer the logic of this method to a separate service and call it from here.
     @ApplicationModuleListener()
     void onOrderCreated(OrderCreatedEvent event) throws StripeException {
 
@@ -42,6 +45,11 @@ class PaymentEventHandler {
         payment.setPaymentIntentId(paymentIntent.getId());
         payment.setClientSecret(paymentIntent.getClientSecret());
         paymentRepository.save(payment);
+    }
+
+    @ApplicationModuleListener
+    void onOrderCancelled(OrderCancelledEvent event) throws StripeException {
+        paymentService.cancelPaymentByOrderId(event.orderId());
     }
 
 }

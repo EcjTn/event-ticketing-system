@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import com.ecjtaneo.ticket_management_backend.shared.events.OrderCancelledEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -51,7 +52,7 @@ public class OrderService {
         saveOrderItems(orderItems, order);
         updateEventTierCounts(orderItems);
 
-        eventPublisher.publishEvent(new OrderCreatedEvent(order.getId(), userId, totalAmount));
+        eventPublisher.publishEvent(new OrderCreatedEvent(order.getId(), userId, totalAmount, order.getExpiresAt()));
 
         return mapper.toOrderInfoResponseDto(order);
     }
@@ -135,6 +136,11 @@ public class OrderService {
                 .map(item -> new AdjustSoldCountRequest(item.getEventTierId(), item.getQuantity()))
                 .toList();
         eventApi.batchDecrementEventTierSoldCount(adjustments);
+
+        //publish OrderCancelledEvent so Payment module can cancel PaymentIntent on Stripe
+        //keep decoupled from Payment module by just publishing an event and let the Payment module handle the rest
+        //unlike eventApi, orders should not know about the existence of the Payment module, so we use eventPublisher directly to publish an event and let the Payment module handle it if it exists
+        eventPublisher.publishEvent(new OrderCancelledEvent(order.getId()));
 
         return new MessageResponseDto("Order cancelled successfully");
     }

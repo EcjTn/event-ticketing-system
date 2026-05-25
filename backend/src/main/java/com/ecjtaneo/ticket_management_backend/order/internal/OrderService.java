@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import com.ecjtaneo.ticket_management_backend.event.EventApi;
 import com.ecjtaneo.ticket_management_backend.event.EventTierBasicInfo;
 import com.ecjtaneo.ticket_management_backend.event.AdjustSoldCountRequest;
-import com.ecjtaneo.ticket_management_backend.order.OrderCreatedEvent;
+import com.ecjtaneo.ticket_management_backend.shared.events.OrderCreatedEvent;
 import com.ecjtaneo.ticket_management_backend.order.internal.dto.CreateOrderRequestDto;
 import com.ecjtaneo.ticket_management_backend.order.internal.dto.OrderInfoResponseDto;
 import com.ecjtaneo.ticket_management_backend.order.internal.dto.OrderItemRequestDto;

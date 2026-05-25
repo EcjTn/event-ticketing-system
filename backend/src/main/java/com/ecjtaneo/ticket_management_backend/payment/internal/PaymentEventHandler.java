@@ -5,7 +5,7 @@ import com.stripe.StripeClient;
 import org.springframework.modulith.events.ApplicationModuleListener;
 import org.springframework.stereotype.Service;
 
-import com.ecjtaneo.ticket_management_backend.order.OrderCreatedEvent;
+import com.ecjtaneo.ticket_management_backend.shared.events.OrderCreatedEvent;
 import com.ecjtaneo.ticket_management_backend.payment.internal.model.Payment;
 
 import lombok.RequiredArgsConstructor;

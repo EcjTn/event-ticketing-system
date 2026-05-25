@@ -1,4 +1,4 @@
-package com.ecjtaneo.ticket_management_backend.order;
+package com.ecjtaneo.ticket_management_backend.shared.events;
 
 import java.math.BigDecimal;
 

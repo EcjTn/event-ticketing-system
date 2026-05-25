@@ -15,6 +15,8 @@ import com.ecjtaneo.ticket_management_backend.payment.internal.model.Payment;
 
 import lombok.RequiredArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 class PaymentEventHandler {
@@ -42,6 +44,7 @@ class PaymentEventHandler {
         payment.setOrderId(event.orderId());
         payment.setUserId(event.userId());
         payment.setAmount(event.amount());
+        payment.setExpiresAt(LocalDateTime.now().plusMinutes(15));
         payment.setPaymentIntentId(paymentIntent.getId());
         payment.setClientSecret(paymentIntent.getClientSecret());
         paymentRepository.save(payment);

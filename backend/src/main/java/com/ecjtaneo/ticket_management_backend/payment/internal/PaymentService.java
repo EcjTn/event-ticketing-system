@@ -21,6 +21,9 @@ public class PaymentService {
     PaymentResponseDto getPaymentInfoByOrderId(Long orderId) {
         Payment payment = paymentRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Payment not found for order id: " + orderId));
+
+
+
         return new PaymentResponseDto(payment.getClientSecret(), payment.getStatus());
     }
 

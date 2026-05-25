@@ -45,6 +45,9 @@ public class Payment {
     @JdbcType(PostgreSQLEnumJdbcType.class)
     @Column(nullable = false)
     private PaymentStatus status;
+
+    @Column(name = "expires_at", nullable = false)
+    private LocalDateTime expiresAt;
     
     @Column(name = "paid_at")
     private LocalDateTime paidAt;

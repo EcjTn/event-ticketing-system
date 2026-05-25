@@ -1,0 +1,2 @@
+ALTER TABLE payment
+ADD COLUMN expires_at TIMESTAMP NOT NULL;

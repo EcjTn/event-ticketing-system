@@ -2,6 +2,9 @@ package com.ecjtaneo.ticket_management_backend.payment.internal;
 
 import com.ecjtaneo.ticket_management_backend.payment.internal.model.PaymentStatus;
 import com.stripe.StripeClient;
+import com.stripe.exception.StripeException;
+import com.stripe.model.PaymentIntent;
+import com.stripe.param.PaymentIntentCreateParams;
 import org.springframework.modulith.events.ApplicationModuleListener;
 import org.springframework.stereotype.Service;
 
@@ -16,14 +19,24 @@ class PaymentEventHandler {
     private final PaymentRepository paymentRepository;
     private final StripeClient stripeClient;
 
-    //TODO: Create payment intent with Stripe API and save the payment info to the database
     @ApplicationModuleListener()
-    void onOrderCreated(OrderCreatedEvent event) {
+    void onOrderCreated(OrderCreatedEvent event) throws StripeException {
+
+        // Create a payment intent with stripe
+        PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
+                .setAmount(event.amount().longValueExact())
+                .setCurrency("php")
+                .build();
+
+        PaymentIntent paymentIntent = stripeClient.v1().paymentIntents().create(params);
+
         Payment payment = new Payment();
         payment.setStatus(PaymentStatus.PENDING);
         payment.setOrderId(event.orderId());
         payment.setUserId(event.userId());
         payment.setAmount(event.amount());
+        payment.setPaymentIntentId(paymentIntent.getId());
+        payment.setClientSecret(paymentIntent.getClientSecret());
         paymentRepository.save(payment);
     }
 

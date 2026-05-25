@@ -32,7 +32,13 @@ public class Payment {
     
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal amount;
-    
+
+    @Column(name = "payment_intent_id", unique = true)
+    private String paymentIntentId;
+
+    @Column(name = "client_secret", unique = true)
+    private String clientSecret;
+
     @Enumerated(EnumType.STRING)
     @JdbcType(PostgreSQLEnumJdbcType.class)
     @Column(nullable = false)

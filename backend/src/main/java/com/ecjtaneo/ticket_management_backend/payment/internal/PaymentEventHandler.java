@@ -4,6 +4,7 @@ import com.ecjtaneo.ticket_management_backend.payment.internal.model.PaymentStat
 import com.stripe.StripeClient;
 import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
+import com.stripe.net.RequestOptions;
 import com.stripe.param.PaymentIntentCreateParams;
 import org.springframework.modulith.events.ApplicationModuleListener;
 import org.springframework.stereotype.Service;
@@ -28,7 +29,10 @@ class PaymentEventHandler {
                 .setCurrency("php")
                 .build();
 
-        PaymentIntent paymentIntent = stripeClient.v1().paymentIntents().create(params);
+        RequestOptions options = RequestOptions.builder()
+                .setIdempotencyKey(event.orderId().toString()).build();
+
+        PaymentIntent paymentIntent = stripeClient.v1().paymentIntents().create(params, options);
 
         Payment payment = new Payment();
         payment.setStatus(PaymentStatus.PENDING);

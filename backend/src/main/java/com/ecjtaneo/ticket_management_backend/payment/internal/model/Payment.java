@@ -27,9 +27,6 @@ public class Payment {
     @Column(name = "user_id", nullable = false)
     private Long userId;
     
-    @Column(name = "event_id", nullable = false)
-    private Long eventId;
-    
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal amount;
 

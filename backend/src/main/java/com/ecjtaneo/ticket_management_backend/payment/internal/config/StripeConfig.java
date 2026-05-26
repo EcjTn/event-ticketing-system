@@ -1,4 +1,4 @@
-package com.ecjtaneo.ticket_management_backend.payment.internal;
+package com.ecjtaneo.ticket_management_backend.payment.internal.config;
 
 import com.stripe.StripeClient;
 import org.springframework.beans.factory.annotation.Value;

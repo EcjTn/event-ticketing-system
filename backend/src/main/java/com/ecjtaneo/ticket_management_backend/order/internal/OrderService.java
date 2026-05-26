@@ -35,7 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class OrderService {
-    private final long expirationCheckRateMs = 600_000; // 10 minutes
+    private final static long expirationCheckRateMs = 600_000; // 10 minutes
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final ApplicationEventPublisher eventPublisher;

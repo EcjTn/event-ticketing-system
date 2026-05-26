@@ -29,7 +29,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class PaymentService {
-
+    private static final String STRIPE_WEBHOOK_PAYMENT_SUCCEEDED = "payment_intent.succeeded";
+    private static final String STRIPE_WEBHOOK_PAYMENT_FAILED = "payment_intent.payment_failed";
     private final PaymentRepository paymentRepository;
     private final StripeClient stripeClient;
     private final ApplicationEventPublisher eventPublisher;
@@ -118,7 +119,7 @@ public class PaymentService {
 
         log.info("Received Stripe webhook event: {}", event.getType());
 
-        if ("payment_intent.succeeded".equals(event.getType())) {
+        if (event.getType().equals(STRIPE_WEBHOOK_PAYMENT_SUCCEEDED)) {
             PaymentIntent paymentIntent = (PaymentIntent) event.getDataObjectDeserializer().getObject()
                     .orElseThrow(() -> new ValidationException("Failed to deserialize PaymentIntent"));
 

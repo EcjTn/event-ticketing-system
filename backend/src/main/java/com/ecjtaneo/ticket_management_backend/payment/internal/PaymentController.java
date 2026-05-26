@@ -1,5 +1,6 @@
 package com.ecjtaneo.ticket_management_backend.payment.internal;
 
+import com.ecjtaneo.ticket_management_backend.payment.internal.dto.PaymentResponseDto;
 import com.stripe.exception.StripeException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

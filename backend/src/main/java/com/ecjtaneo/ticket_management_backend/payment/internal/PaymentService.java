@@ -1,14 +1,15 @@
 package com.ecjtaneo.ticket_management_backend.payment.internal;
 
 import com.ecjtaneo.ticket_management_backend.payment.internal.model.Payment;
+import com.ecjtaneo.ticket_management_backend.payment.internal.dto.PaymentResponseDto;
 import com.ecjtaneo.ticket_management_backend.payment.internal.model.PaymentStatus;
+import com.ecjtaneo.ticket_management_backend.shared.events.PaymentFailedEvent;
 import com.ecjtaneo.ticket_management_backend.shared.exceptions.ResourceNotFoundException;
 import com.ecjtaneo.ticket_management_backend.shared.exceptions.ValidationException;
 import com.ecjtaneo.ticket_management_backend.shared.events.OrderCreatedEvent;
 import com.ecjtaneo.ticket_management_backend.shared.events.PaymentSucceededEvent;
 import com.stripe.StripeClient;
 import com.stripe.exception.StripeException;
-import com.stripe.exception.SignatureVerificationException;
 import com.stripe.model.Event;
 import com.stripe.model.PaymentIntent;
 import com.stripe.param.PaymentIntentCreateParams;
@@ -112,21 +113,23 @@ public class PaymentService {
         }
     }
 
-    //TODO: add payment failed handling, use switch case for event types. Emit events also.
-    //TODO: Check payment status on succeeded event, give refund if payment was already cancelled in DB.
     public void handleWebhook(String payload, String sigHeader) throws StripeException {
+        //Verify the webhook signature + Deserialize the raw json
         Event event = Webhook.constructEvent(payload, sigHeader, webhookSecret);
 
         log.info("Received Stripe webhook event: {}", event.getType());
 
-        if (event.getType().equals(STRIPE_WEBHOOK_PAYMENT_SUCCEEDED)) {
-            PaymentIntent paymentIntent = (PaymentIntent) event.getDataObjectDeserializer().getObject()
-                    .orElseThrow(() -> new ValidationException("Failed to deserialize PaymentIntent"));
+        PaymentIntent paymentIntent = (PaymentIntent) event.getDataObjectDeserializer().getObject()
+                .orElseThrow(() -> new ValidationException("Failed to deserialize PaymentIntent"));
 
-            processPaymentSuccess(paymentIntent.getId());
+        switch (event.getType()) {
+            case STRIPE_WEBHOOK_PAYMENT_SUCCEEDED -> processPaymentSuccess(paymentIntent.getId());
+            case STRIPE_WEBHOOK_PAYMENT_FAILED -> processPaymentFailure(paymentIntent.getId());
+            default -> log.info("Unhandled Stripe event: {}", event.getType());
         }
     }
 
+    //TODO: Move processPaymentSuccess() and processPaymentFailure(), both are transactional methods
     @Transactional
     public void processPaymentSuccess(String paymentIntentId) throws StripeException {
         Payment payment = paymentRepository.findByPaymentIntentIdForUpdate(paymentIntentId)
@@ -145,7 +148,6 @@ public class PaymentService {
             log.info("Processing successful payment for order {}. Updating status to SUCCESS.", payment.getOrderId());
             payment.setStatus(PaymentStatus.SUCCESS);
             payment.setPaidAt(LocalDateTime.now());
-            paymentRepository.save(payment);
 
             // Publish PaymentSucceededEvent so tickets can be created and Orders can be marked as CONFIRMED in Order module
             eventPublisher.publishEvent(new PaymentSucceededEvent(payment.getOrderId()));
@@ -156,4 +158,26 @@ public class PaymentService {
 
     }
 
+    @Transactional
+    public void processPaymentFailure(String paymentIntentId) throws StripeException {
+        Payment payment = paymentRepository.findByPaymentIntentIdForUpdate(paymentIntentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Payment not found for payment intent ID: " + paymentIntentId));
+
+        if (payment.getStatus() == PaymentStatus.CANCELLED) {
+            log.info("Payment is already CANCELLED in DB for order {}. No action needed.", payment.getOrderId());
+        }
+        else if(payment.getStatus() == PaymentStatus.PENDING) {
+            log.info("Processing failed payment for order {}. Updating status to FAILED.", payment.getOrderId());
+            payment.setStatus(PaymentStatus.FAILED);
+
+            // Publish PaymentFailedEvent so Order module can mark the order as CANCELLED and release reserved tickets
+            // Order module should react to this event
+            eventPublisher.publishEvent(new PaymentFailedEvent(payment.getOrderId()));
+        }
+        else {
+            log.info("Payment for order {} is already in status {}. Skipping.", payment.getOrderId(), payment.getStatus());
+        }
+
+
+    }
 }

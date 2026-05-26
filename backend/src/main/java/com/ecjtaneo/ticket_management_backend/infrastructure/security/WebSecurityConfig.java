@@ -25,7 +25,10 @@ class WebSecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http) {
         return http
                 .cors(Customizer.withDefaults())
-                .csrf(CsrfConfigurer::spa)
+                .csrf(csrf -> {
+                    csrf.spa()
+                            .ignoringRequestMatchers("/payments/webhook");
+                })
 
                 .formLogin(l -> l
                         .loginProcessingUrl("/auth/login")
@@ -50,6 +53,7 @@ class WebSecurityConfig {
                 .authorizeHttpRequests(a -> a
                         .requestMatchers(HttpMethod.GET, "/events").permitAll()
                         .requestMatchers(HttpMethod.POST, "/events").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/payments/webhook").permitAll()
                         .anyRequest().authenticated())
 
                 .exceptionHandling(exception -> exception

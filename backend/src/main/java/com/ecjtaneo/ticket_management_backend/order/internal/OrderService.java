@@ -15,6 +15,7 @@ import com.ecjtaneo.ticket_management_backend.event.EventApi;
 import com.ecjtaneo.ticket_management_backend.event.EventTierBasicInfo;
 import com.ecjtaneo.ticket_management_backend.event.AdjustSoldCountRequest;
 import com.ecjtaneo.ticket_management_backend.shared.events.OrderCreatedEvent;
+import com.ecjtaneo.ticket_management_backend.shared.events.OrdersBatchExpiredEvent;
 import com.ecjtaneo.ticket_management_backend.order.internal.dto.CreateOrderRequestDto;
 import com.ecjtaneo.ticket_management_backend.order.internal.dto.OrderInfoResponseDto;
 import com.ecjtaneo.ticket_management_backend.order.internal.dto.OrderItemRequestDto;
@@ -137,9 +138,13 @@ public class OrderService {
                 .toList();
         eventApi.batchDecrementEventTierSoldCount(adjustments);
 
-        //publish OrderCancelledEvent so Payment module can cancel PaymentIntent on Stripe
-        //keep decoupled from Payment module by just publishing an event and let the Payment module handle the rest
-        //unlike eventApi, orders should not know about the existence of the Payment module, so we use eventPublisher directly to publish an event and let the Payment module handle it if it exists
+        // publish OrderCancelledEvent so Payment module can cancel PaymentIntent on
+        // Stripe
+        // keep decoupled from Payment module by just publishing an event and let the
+        // Payment module handle the rest
+        // unlike eventApi, orders should not know about the existence of the Payment
+        // module, so we use eventPublisher directly to publish an event and let the
+        // Payment module handle it if it exists
         eventPublisher.publishEvent(new OrderCancelledEvent(order.getId()));
 
         return new MessageResponseDto("Order cancelled successfully");
@@ -150,20 +155,26 @@ public class OrderService {
     public void processExpiredOrders() {
         log.info("Starting to process expired orders");
 
-        // cancel 100 expired orders and get the list of event tiers
-        // and quantities to restore
-        List<EventTierQuantityAggregateProjection> restoreViews = orderRepository.batchCancelExpiredOrdersAndAggregateTier();
+        // Retrieve expired order IDs using the new batch cancellation query
+        List<Long> orderIds = orderRepository.batchCancelExpiredOrdersAndReturnIds();
 
-        if (restoreViews.isEmpty()) {
+        if (orderIds.isEmpty()) {
             log.info("No expired orders found");
             return;
         }
 
-        List<AdjustSoldCountRequest> adjustments = restoreViews.stream()
-                .map(aggregate -> new AdjustSoldCountRequest(aggregate.eventTierId(), aggregate.totalQuantity()))
-                .toList();
+        // Retrieve stock restore projections using the aggregate tiers query
+        List<EventTierQuantityAggregateProjection> restoreViews = orderItemRepository.aggregateTiersByOrderIds(orderIds);
 
-        eventApi.batchDecrementEventTierSoldCount(adjustments);
+        if (!restoreViews.isEmpty()) {
+            List<AdjustSoldCountRequest> adjustments = restoreViews.stream()
+                    .map(aggregate -> new AdjustSoldCountRequest(aggregate.eventTierId(), aggregate.totalQuantity()))
+                    .toList();
+            eventApi.batchDecrementEventTierSoldCount(adjustments);
+        }
+
+        // Fire OrdersBatchExpiredEvent after stock is restored
+        eventPublisher.publishEvent(new OrdersBatchExpiredEvent(orderIds));
     }
 
 }

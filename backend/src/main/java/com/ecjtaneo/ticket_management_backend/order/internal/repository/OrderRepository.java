@@ -48,40 +48,28 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             """, nativeQuery = true)
     List<EventTierQuantityAggregateProjection> batchCancelExpiredOrdersAndAggregateTier();
 
-
-
     // v2 of the order cancelling batch
-    // this version splits the query into two query, 1 for batch cancelling returning only the order ids,
-    // and another query for aggregating the tier quantities based on the cancelled order ids.
-    // I decided to split when Payment module is involved since we need to cancel the payment intents in a separate transaction, which requires me to get the cancelled order ids first before cancelling the payment intents.
+    // this version splits the query into two query, 1 for batch cancelling
+    // returning only the order ids,
+    // and another query for aggregating the tier quantities based on the cancelled (transferred in OrderItemRepository)
+    // order ids.
+    // I decided to split when Payment module is involved since we need to cancel
+    // the payment intents in a separate transaction, which requires me to get the
+    // cancelled order ids first before cancelling the payment intents.
     @Query(value = """
-        UPDATE orders
-        SET status = 'CANCELLED'
-        WHERE id IN (
-            SELECT id
-            FROM orders
-            WHERE status = 'PENDING'
-            AND expires_at < now()
-            ORDER BY expires_at
-            LIMIT 100
-            FOR UPDATE SKIP LOCKED
-        )
-        RETURNING id
-        """, nativeQuery = true)
+            UPDATE orders
+            SET status = 'CANCELLED'
+            WHERE id IN (
+                SELECT id
+                FROM orders
+                WHERE status = 'PENDING'
+                AND expires_at < now()
+                ORDER BY expires_at
+                LIMIT 100
+                FOR UPDATE SKIP LOCKED
+            )
+            RETURNING id
+            """, nativeQuery = true)
     List<Long> batchCancelExpiredOrdersAndReturnIds();
-
-
-    //Query 2: aggregate tiers by order IDs
-    @Query(value = """
-        SELECT
-            oi.event_tier_id AS eventTierId,
-            SUM(oi.quantity) AS totalQuantity
-        FROM order_item oi
-        WHERE oi.order_id IN (:orderIds)
-        GROUP BY oi.event_tier_id
-        """, nativeQuery = true)
-    List<EventTierQuantityAggregateProjection> aggregateTiersByOrderIds(
-            @Param("orderIds") List<Long> orderIds
-    );
 
 }

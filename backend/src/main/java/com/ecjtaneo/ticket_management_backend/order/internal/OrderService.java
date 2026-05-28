@@ -128,6 +128,7 @@ public class OrderService {
         return orderRepository.existsByIdAndUserId(orderId, userId);
     }
 
+    //TODO: move the cancellation logic to a separate method and call it from both cancelOrder and cancelOrderOnPaymentFailure to avoid code duplication
     @Transactional
     public MessageResponseDto cancelOrder(Long orderId) {
         Order order = orderRepository.findWithItemsByIdAndStatusForUpdate(orderId, OrderStatus.PENDING)
@@ -150,6 +151,18 @@ public class OrderService {
         eventPublisher.publishEvent(new OrderCancelledEvent(order.getId()));
 
         return new MessageResponseDto("Order cancelled successfully");
+    }
+
+    public void cancelOrderOnPaymentFailure(Long orderId) {
+        Order order = orderRepository.findWithItemsByIdAndStatusForUpdate(orderId, OrderStatus.PENDING)
+                .orElseThrow(() -> new ValidationException("Order not found or already cancelled"));
+
+        order.setStatus(OrderStatus.CANCELLED);
+
+        List<AdjustSoldCountRequest> adjustments = order.getItems().stream()
+                .map(item -> new AdjustSoldCountRequest(item.getEventTierId(), item.getQuantity()))
+                .toList();
+        eventApi.batchDecrementEventTierSoldCount(adjustments);
     }
 
     @Transactional

@@ -177,7 +177,7 @@ public class OrderService {
         order.setStatus(OrderStatus.CONFIRMED);
 
         // publish OrderConfirmedEvent so Tickets are created -- ticket module listens to this event to create tickets
-        eventPublisher.publishEvent(new OrderConfirmedEvent(order.getId(), order.getTotalAmount()));
+        eventPublisher.publishEvent(new OrderConfirmedEvent(order.getId(), order.getUserId(), order.getEventId(), order.getTotalAmount()));
     }
 
     @Scheduled(fixedDelay = expirationCheckRateMs)

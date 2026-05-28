@@ -26,30 +26,32 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<Order> findByIdForUpdate(Long id);
 
-    // Trying out new method for batch cancelling
-    @Query(value = """
-            WITH cancelled AS (
-                UPDATE orders o
-                SET status = 'CANCELLED'
-                WHERE o.id IN (
-                    SELECT id
-                    FROM orders
-                    WHERE status = 'PENDING'
-                    AND expires_at < now()
-                    ORDER BY expires_at
-                    LIMIT 100
-                    FOR UPDATE SKIP LOCKED
-                )
-                RETURNING o.id
-            )
-            SELECT
-                oi.event_tier_id AS eventTierId,
-                SUM(oi.quantity) AS totalQuantity
-            FROM order_item oi
-            JOIN cancelled c ON c.id = oi.order_id
-            GROUP BY oi.event_tier_id;
-            """, nativeQuery = true)
-    List<EventTierQuantityAggregateProjection> batchCancelExpiredOrdersAndAggregateTier();
+    // Trying out new method for batch cancelling -- now not used, switched to v2 below
+//    @Query(value = """
+//            WITH cancelled AS (
+//                UPDATE orders o
+//                SET status = 'CANCELLED'
+//                WHERE o.id IN (
+//                    SELECT id
+//                    FROM orders
+//                    WHERE status = 'PENDING'
+//                    AND expires_at < now()
+//                    ORDER BY expires_at
+//                    LIMIT 100
+//                    FOR UPDATE SKIP LOCKED
+//                )
+//                RETURNING o.id
+//            )
+//            SELECT
+//                oi.event_tier_id AS eventTierId,
+//                SUM(oi.quantity) AS totalQuantity
+//            FROM order_item oi
+//            JOIN cancelled c ON c.id = oi.order_id
+//            GROUP BY oi.event_tier_id;
+//            """, nativeQuery = true)
+//    List<EventTierQuantityAggregateProjection> batchCancelExpiredOrdersAndAggregateTier();
+
+
 
     // v2 of the order cancelling batch
     // this version splits the query into two query, 1 for batch cancelling

@@ -124,13 +124,13 @@ public class OrderService {
         eventApi.batchIncrementEventTierSoldCount(adjustments);
     }
 
-    public boolean ownsOrder(Long orderId, Long userId) {
+    boolean ownsOrder(Long orderId, Long userId) {
         return orderRepository.existsByIdAndUserId(orderId, userId);
     }
 
     //TODO: move the cancellation logic to a separate method and call it from both cancelOrder and cancelOrderOnPaymentFailure to avoid code duplication
     @Transactional
-    public MessageResponseDto cancelOrder(Long orderId) {
+    MessageResponseDto cancelOrder(Long orderId) {
         Order order = orderRepository.findWithItemsByIdAndStatusForUpdate(orderId, OrderStatus.PENDING)
                 .orElseThrow(() -> new ValidationException("Order not found or already cancelled"));
 
@@ -153,7 +153,7 @@ public class OrderService {
         return new MessageResponseDto("Order cancelled successfully");
     }
 
-    public void cancelOrderOnPaymentFailure(Long orderId) {
+    void cancelOrderOnPaymentFailure(Long orderId) {
         Order order = orderRepository.findWithItemsByIdAndStatusForUpdate(orderId, OrderStatus.PENDING)
                 .orElseThrow(() -> new ValidationException("Order not found or already cancelled"));
 
@@ -182,7 +182,7 @@ public class OrderService {
 
     @Scheduled(fixedDelay = expirationCheckRateMs)
     @Transactional
-    public void processExpiredOrders() {
+    void processExpiredOrders() {
         log.info("Starting to process expired orders");
 
         // Retrieve expired order IDs using the new batch cancellation query

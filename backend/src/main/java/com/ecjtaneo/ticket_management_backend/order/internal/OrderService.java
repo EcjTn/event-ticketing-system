@@ -7,6 +7,8 @@ import java.util.Comparator;
 import java.util.List;
 
 import com.ecjtaneo.ticket_management_backend.shared.events.OrderCancelledEvent;
+import com.ecjtaneo.ticket_management_backend.shared.events.OrderConfirmedEvent;
+import com.ecjtaneo.ticket_management_backend.shared.exceptions.ResourceNotFoundException;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -128,7 +130,7 @@ public class OrderService {
 
     @Transactional
     public MessageResponseDto cancelOrder(Long orderId) {
-        Order order = orderRepository.findWithItemsByIdAndStatus(orderId, OrderStatus.PENDING)
+        Order order = orderRepository.findWithItemsByIdAndStatusForUpdate(orderId, OrderStatus.PENDING)
                 .orElseThrow(() -> new ValidationException("Order not found or already cancelled"));
 
         order.setStatus(OrderStatus.CANCELLED);
@@ -148,6 +150,21 @@ public class OrderService {
         eventPublisher.publishEvent(new OrderCancelledEvent(order.getId()));
 
         return new MessageResponseDto("Order cancelled successfully");
+    }
+
+    @Transactional
+    void confirmOrder(Long orderId) {
+        Order order = orderRepository.findByIdForUpdate(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+
+        if (order.getStatus() != OrderStatus.PENDING) {
+            throw new ValidationException("Only pending orders can be confirmed");
+        }
+
+        order.setStatus(OrderStatus.CONFIRMED);
+
+        // publish OrderConfirmedEvent so Tickets are created -- ticket module listens to this event to create tickets
+        eventPublisher.publishEvent(new OrderConfirmedEvent(order.getId(), order.getTotalAmount()));
     }
 
     @Scheduled(fixedDelay = expirationCheckRateMs)

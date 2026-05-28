@@ -10,11 +10,11 @@ import org.springframework.stereotype.Service;
 public class OrderEventHandler {
     private final OrderService orderService;
 
-    public void onPaymentSucceeded(PaymentSucceededEvent event) {
-        //TODO: call order service to mark order as CONFIRMED by order id
+    void onPaymentSucceeded(PaymentSucceededEvent event) {
+        orderService.confirmOrder(event.orderId());
     }
 
-    public void onPaymentFailed(PaymentFailedEvent event) {
+    void onPaymentFailed(PaymentFailedEvent event) {
         //TODO: call order service to mark order as CANCELLED by order id AND release reserved tickets
     }
 

@@ -21,7 +21,10 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @EntityGraph(attributePaths = { "items" })
-    Optional<Order> findWithItemsByIdAndStatus(Long id, OrderStatus status);
+    Optional<Order> findWithItemsByIdAndStatusForUpdate(Long id, OrderStatus status);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    Optional<Order> findByIdForUpdate(Long id);
 
     // Trying out new method for batch cancelling
     @Query(value = """

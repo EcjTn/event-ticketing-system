@@ -21,7 +21,7 @@ public class TicketService {
         ticket.setOrderId(event.orderId());
         ticket.setUserId(event.userId());
         ticket.setEventId(event.eventId());
-        ticket.setPricePaid(event.totalAmount());
+        ticket.setPricePaid(event.totalAmount()); //refactor this. use the order item's price instead of the total amount for the order.
     }
 
 }

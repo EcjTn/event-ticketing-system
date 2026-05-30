@@ -1,6 +1,15 @@
 package com.ecjtaneo.ticket_management_backend.shared.events;
 
-import java.math.BigDecimal;
+import com.ecjtaneo.ticket_management_backend.shared.enums.TicketTier;
 
-public record OrderConfirmedEvent(Long orderId, Long userId, Long eventId, BigDecimal totalAmount) {
+import java.math.BigDecimal;
+import java.util.List;
+
+public record OrderConfirmedEvent(Long orderId, Long userId, Long eventId, List<OrderBasicInfo> items) {
+
+    public record OrderBasicInfo(
+        TicketTier tier,
+        BigDecimal price
+    ) {}
+
 }

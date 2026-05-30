@@ -128,8 +128,7 @@ public class OrderService {
         return orderRepository.existsByIdAndUserId(orderId, userId);
     }
 
-    // TODO: move the cancellation logic to a separate method and call it from both
-    // cancelOrder and cancelOrderOnPaymentFailure to avoid code duplication
+
     @Transactional
     MessageResponse cancelOrder(Long orderId) {
         Order order = orderRepository.findWithItemsForUpdateByIdAndStatus(orderId, OrderStatus.PENDING)
@@ -178,10 +177,17 @@ public class OrderService {
 
         order.setStatus(OrderStatus.CONFIRMED);
 
-        // publish OrderConfirmedEvent so Tickets are created -- ticket module listens
-        // to this event to create tickets
+        // publish OrderConfirmedEvent so Tickets are created -- ticket module listens to this event to create tickets
         eventPublisher.publishEvent(new OrderConfirmedEvent(
-                order.getId(), order.getUserId(), order.getEventId(), order.getTotalAmount()));
+                orderId,
+                order.getUserId(),
+                order.getEventId(),
+                order.getItems()
+                        .stream()
+                        .map(item -> new OrderConfirmedEvent.OrderBasicInfo(item.getTier(), item.getUnitPrice()))
+                        .toList()
+        ));
+
     }
 
     @Scheduled(fixedDelay = expirationCheckRateMs)

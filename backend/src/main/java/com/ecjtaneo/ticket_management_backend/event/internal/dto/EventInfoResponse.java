@@ -9,7 +9,7 @@ import java.util.List;
 // changed from record to dto
 // record is immutable, can not set the calculated total available tickets after initialized.
 @Data
-public class EventInfoResponseDto{
+public class EventInfoResponse {
     Long id;
     String name;
     LocalDateTime date;
@@ -17,6 +17,6 @@ public class EventInfoResponseDto{
     String description;
     String imageUrl;
     EventStatus status;
-    List<EventTierInfoResponseDto> tiers;
+    List<EventTierInfoResponse> tiers;
     Integer availableTickets;
 }

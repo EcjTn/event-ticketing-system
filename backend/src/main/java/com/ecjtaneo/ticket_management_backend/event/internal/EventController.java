@@ -1,10 +1,10 @@
 package com.ecjtaneo.ticket_management_backend.event.internal;
 
-import com.ecjtaneo.ticket_management_backend.event.internal.dto.CreateEventRequestDto;
-import com.ecjtaneo.ticket_management_backend.event.internal.dto.EventBasicInfoResponseDto;
-import com.ecjtaneo.ticket_management_backend.event.internal.dto.EventInfoResponseDto;
+import com.ecjtaneo.ticket_management_backend.event.internal.dto.CreateEventRequest;
+import com.ecjtaneo.ticket_management_backend.event.internal.dto.EventBasicInfoResponse;
+import com.ecjtaneo.ticket_management_backend.event.internal.dto.EventInfoResponse;
 import com.ecjtaneo.ticket_management_backend.shared.annotations.CurrentUserId;
-import com.ecjtaneo.ticket_management_backend.shared.dtos.MessageResponseDto;
+import com.ecjtaneo.ticket_management_backend.shared.dtos.MessageResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -21,20 +21,20 @@ class EventController {
     private final EventService service;
 
     @GetMapping("/{id}")
-    EventInfoResponseDto getEventInfoById(@PathVariable Long id) {
+    EventInfoResponse getEventInfoById(@PathVariable Long id) {
         return service.getEventInfoById(id);
     }
 
     @GetMapping
-    List<EventBasicInfoResponseDto> getEvents(@RequestParam(name = "cursor", required = false) Long lastSeenId) {
+    List<EventBasicInfoResponse> getEvents(@RequestParam(name = "cursor", required = false) Long lastSeenId) {
         if (lastSeenId == null)
             return service.getEvents();
         return service.getEvents(lastSeenId);
     }
 
     @PostMapping
-    MessageResponseDto createEvent(@RequestPart("data") @Valid CreateEventRequestDto dto,
-            @RequestPart("image") MultipartFile image, @CurrentUserId Long userId) throws IOException {
+    MessageResponse createEvent(@RequestPart("data") @Valid CreateEventRequest dto,
+                                @RequestPart("image") MultipartFile image, @CurrentUserId Long userId) throws IOException {
         return service.createEvent(dto, image, userId);
     }
 }

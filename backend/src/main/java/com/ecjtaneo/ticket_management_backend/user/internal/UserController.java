@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.ecjtaneo.ticket_management_backend.shared.annotations.CurrentUserId;
-import com.ecjtaneo.ticket_management_backend.shared.dtos.MessageResponseDto;
+import com.ecjtaneo.ticket_management_backend.shared.dtos.MessageResponse;
 import com.ecjtaneo.ticket_management_backend.user.internal.dto.UserInfoResponseDto;
 
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,7 @@ class UserController {
     }
 
     @PatchMapping("/me/profile-photo")
-    MessageResponseDto changeProfilePhoto(@RequestParam("file") MultipartFile file, @CurrentUserId Long userId) throws IOException {
+    MessageResponse changeProfilePhoto(@RequestParam("file") MultipartFile file, @CurrentUserId Long userId) throws IOException {
         return service.changeProfilePhoto(file, userId);
     }
 }

@@ -2,17 +2,17 @@ package com.ecjtaneo.ticket_management_backend.event.internal;
 
 import com.ecjtaneo.ticket_management_backend.event.EventApi;
 import com.ecjtaneo.ticket_management_backend.event.EventTierBasicInfo;
-import com.ecjtaneo.ticket_management_backend.event.AdjustSoldCountRequest;
-import com.ecjtaneo.ticket_management_backend.event.internal.dto.CreateEventRequestDto;
-import com.ecjtaneo.ticket_management_backend.event.internal.dto.EventBasicInfoResponseDto;
-import com.ecjtaneo.ticket_management_backend.event.internal.dto.EventInfoResponseDto;
+import com.ecjtaneo.ticket_management_backend.event.AdjustSoldCountData;
+import com.ecjtaneo.ticket_management_backend.event.internal.dto.CreateEventRequest;
+import com.ecjtaneo.ticket_management_backend.event.internal.dto.EventBasicInfoResponse;
+import com.ecjtaneo.ticket_management_backend.event.internal.dto.EventInfoResponse;
 import com.ecjtaneo.ticket_management_backend.event.internal.model.Event;
 import com.ecjtaneo.ticket_management_backend.event.internal.model.EventStatus;
 import com.ecjtaneo.ticket_management_backend.event.internal.model.EventTier;
 import com.ecjtaneo.ticket_management_backend.event.internal.repository.EventRepository;
 import com.ecjtaneo.ticket_management_backend.event.internal.repository.EventTierRepository;
 import com.ecjtaneo.ticket_management_backend.storage.StorageApi;
-import com.ecjtaneo.ticket_management_backend.shared.dtos.MessageResponseDto;
+import com.ecjtaneo.ticket_management_backend.shared.dtos.MessageResponse;
 import com.ecjtaneo.ticket_management_backend.shared.exceptions.ResourceNotFoundException;
 
 import com.ecjtaneo.ticket_management_backend.shared.exceptions.ValidationException;
@@ -36,33 +36,33 @@ class EventService implements EventApi {
         private final EventMapper mapper;
         private final StorageApi storageApi;
 
-        List<EventBasicInfoResponseDto> getEvents() {
+        List<EventBasicInfoResponse> getEvents() {
                 return mapper.toEventBasicInfoDtoList(
                                 eventRepository.findTop10ByStatusOrderByIdDesc(EventStatus.PUBLISHED));
         }
 
-        List<EventBasicInfoResponseDto> getEvents(Long lastSeenId) {
+        List<EventBasicInfoResponse> getEvents(Long lastSeenId) {
                 return mapper.toEventBasicInfoDtoList(
                                 eventRepository.findTop10ByIdLessThanOrderByIdDesc(lastSeenId));
         }
 
-        EventInfoResponseDto getEventInfoById(Long id) {
+        EventInfoResponse getEventInfoById(Long id) {
                 Event event = eventRepository.findWithTiersById(id)
                                 .orElseThrow(() -> new ResourceNotFoundException("Event not found with id: " + id));
 
-                EventInfoResponseDto eventInfoResponseDto = mapper.toEventInfoDto(event);
+                EventInfoResponse eventInfoResponse = mapper.toEventInfoDto(event);
 
                 Integer totalAvailableTickets = event.getTiers().stream()
                                 .mapToInt(tier -> tier.getQuantity() - tier.getSoldCount())
                                 .sum();
 
-                eventInfoResponseDto.setAvailableTickets(totalAvailableTickets);
+                eventInfoResponse.setAvailableTickets(totalAvailableTickets);
 
-                return eventInfoResponseDto;
+                return eventInfoResponse;
         }
 
         @Transactional
-        MessageResponseDto createEvent(CreateEventRequestDto dto, MultipartFile image, Long createdBy)
+        MessageResponse createEvent(CreateEventRequest dto, MultipartFile image, Long createdBy)
                         throws IOException {
                 Event event = mapper.toEvent(dto);
                 event.setCreatedBy(createdBy);
@@ -80,7 +80,7 @@ class EventService implements EventApi {
 
                 eventTierRepository.saveAll(tiers);
 
-                return new MessageResponseDto("Event created successfully");
+                return new MessageResponse("Event created successfully");
         }
 
         // For validation/existence checks (public)
@@ -116,7 +116,7 @@ class EventService implements EventApi {
 
         @Override
         @Transactional
-        public void batchIncrementEventTierSoldCount(List<AdjustSoldCountRequest> adjustments) {
+        public void batchIncrementEventTierSoldCount(List<AdjustSoldCountData> adjustments) {
                 String sql = """
                                 UPDATE event_tier
                                 SET sold_count = sold_count + ?
@@ -124,7 +124,7 @@ class EventService implements EventApi {
                                 """;
 
                 jdbcTemplate.batchUpdate(sql, adjustments, adjustments.size(),
-                                (PreparedStatement ps, AdjustSoldCountRequest adjustment) -> {
+                                (PreparedStatement ps, AdjustSoldCountData adjustment) -> {
                                         ps.setInt(1, adjustment.quantity());
                                         ps.setLong(2, adjustment.tierId());
                                 });
@@ -132,7 +132,7 @@ class EventService implements EventApi {
 
         @Override
         @Transactional
-        public void batchDecrementEventTierSoldCount(List<AdjustSoldCountRequest> adjustments) {
+        public void batchDecrementEventTierSoldCount(List<AdjustSoldCountData> adjustments) {
                 String sql = """
                                 UPDATE event_tier
                                 SET sold_count = sold_count - ?
@@ -140,7 +140,7 @@ class EventService implements EventApi {
                                 """;
 
                 jdbcTemplate.batchUpdate(sql, adjustments, adjustments.size(),
-                                (PreparedStatement ps, AdjustSoldCountRequest adjustment) -> {
+                                (PreparedStatement ps, AdjustSoldCountData adjustment) -> {
                                         ps.setInt(1, adjustment.quantity());
                                         ps.setLong(2, adjustment.tierId());
                                 });

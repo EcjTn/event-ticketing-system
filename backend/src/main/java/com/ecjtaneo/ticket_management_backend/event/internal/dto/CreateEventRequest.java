@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public record CreateEventRequestDto(
+public record CreateEventRequest(
         @NotBlank(message = "Event name is required") @Size(max = 255, message = "Event name must not exceed 255 characters") String name,
 
         @NotNull(message = "Event date is required") LocalDateTime date,
@@ -17,5 +17,5 @@ public record CreateEventRequestDto(
 
         String description,
 
-        @NotNull(message = "Event tiers are required") @Size(min = 1, max = TicketTier.COUNT, message = "At least one event tier is required and max three") @Valid List<CreateEventTierRequestDto> tiers) {
+        @NotNull(message = "Event tiers are required") @Size(min = 1, max = TicketTier.COUNT, message = "At least one event tier is required and max three") @Valid List<CreateEventTierRequest> tiers) {
 }

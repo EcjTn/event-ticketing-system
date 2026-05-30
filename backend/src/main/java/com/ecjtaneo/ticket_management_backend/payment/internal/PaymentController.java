@@ -1,6 +1,6 @@
 package com.ecjtaneo.ticket_management_backend.payment.internal;
 
-import com.ecjtaneo.ticket_management_backend.payment.internal.dto.PaymentResponseDto;
+import com.ecjtaneo.ticket_management_backend.payment.internal.dto.PaymentResponse;
 import com.stripe.exception.StripeException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +19,7 @@ public class PaymentController {
     private final PaymentService paymentService;
 
     @GetMapping("/{orderId}")
-    PaymentResponseDto getPaymentInfoByOrderId(@PathVariable Long orderId) throws StripeException {
+    PaymentResponse getPaymentInfoByOrderId(@PathVariable Long orderId) throws StripeException {
         return paymentService.getPaymentInfoByOrderIdAndValid(orderId);
     }
 

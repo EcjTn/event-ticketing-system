@@ -7,7 +7,7 @@ import java.io.IOException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.ecjtaneo.ticket_management_backend.shared.dtos.MessageResponseDto;
+import com.ecjtaneo.ticket_management_backend.shared.dtos.MessageResponse;
 import com.ecjtaneo.ticket_management_backend.shared.exceptions.ResourceNotFoundException;
 import com.ecjtaneo.ticket_management_backend.storage.StorageApi;
 import com.ecjtaneo.ticket_management_backend.user.UserApi;
@@ -37,7 +37,7 @@ class UserService implements UserApi {
         return mapper.toBasicInfo(user);
     }
 
-    MessageResponseDto changeProfilePhoto(MultipartFile file, Long userId) throws IOException {
+    MessageResponse changeProfilePhoto(MultipartFile file, Long userId) throws IOException {
         User user = repository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         String fileUrl = storageApi.uploadUserProfilePhoto(file, userId);
@@ -45,7 +45,7 @@ class UserService implements UserApi {
         user.setProfileImageUrl(fileUrl);
         repository.save(user);
 
-        return new MessageResponseDto("Profile updated successfully");
+        return new MessageResponse("Profile updated successfully");
     }
 
 }

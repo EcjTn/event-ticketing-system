@@ -8,7 +8,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-public record CreateOrderRequestDto(
+public record CreateOrderRequest(
         @NotNull Long eventId,
-        @Valid @Size(max = TicketTier.COUNT, message = "Too many ticket tiers") List<OrderItemRequestDto> items) {
+        @Valid @Size(max = TicketTier.COUNT, message = "Too many ticket tiers") List<OrderItemRequest> items) {
 }

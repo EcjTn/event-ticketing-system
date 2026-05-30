@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import com.ecjtaneo.ticket_management_backend.order.internal.dto.OrderInfoResponse;
 import com.ecjtaneo.ticket_management_backend.shared.events.OrderCancelledEvent;
 import com.ecjtaneo.ticket_management_backend.shared.events.OrderConfirmedEvent;
 import com.ecjtaneo.ticket_management_backend.shared.exceptions.ResourceNotFoundException;
@@ -15,18 +16,17 @@ import org.springframework.stereotype.Service;
 
 import com.ecjtaneo.ticket_management_backend.event.EventApi;
 import com.ecjtaneo.ticket_management_backend.event.EventTierBasicInfo;
-import com.ecjtaneo.ticket_management_backend.event.AdjustSoldCountRequest;
+import com.ecjtaneo.ticket_management_backend.event.AdjustSoldCountData;
 import com.ecjtaneo.ticket_management_backend.shared.events.OrderCreatedEvent;
 import com.ecjtaneo.ticket_management_backend.shared.events.OrdersBatchExpiredEvent;
-import com.ecjtaneo.ticket_management_backend.order.internal.dto.CreateOrderRequestDto;
-import com.ecjtaneo.ticket_management_backend.order.internal.dto.OrderInfoResponseDto;
-import com.ecjtaneo.ticket_management_backend.order.internal.dto.OrderItemRequestDto;
+import com.ecjtaneo.ticket_management_backend.order.internal.dto.CreateOrderRequest;
+import com.ecjtaneo.ticket_management_backend.order.internal.dto.OrderItemRequest;
 import com.ecjtaneo.ticket_management_backend.order.internal.model.Order;
 import com.ecjtaneo.ticket_management_backend.order.internal.model.OrderItem;
 import com.ecjtaneo.ticket_management_backend.order.internal.model.OrderStatus;
 import com.ecjtaneo.ticket_management_backend.order.internal.repository.OrderItemRepository;
 import com.ecjtaneo.ticket_management_backend.order.internal.repository.OrderRepository;
-import com.ecjtaneo.ticket_management_backend.shared.dtos.MessageResponseDto;
+import com.ecjtaneo.ticket_management_backend.shared.dtos.MessageResponse;
 import com.ecjtaneo.ticket_management_backend.shared.exceptions.ValidationException;
 
 import jakarta.transaction.Transactional;
@@ -46,7 +46,7 @@ public class OrderService {
     private final EventApi eventApi;
 
     @Transactional
-    OrderInfoResponseDto createOrder(CreateOrderRequestDto request, Long userId) {
+    OrderInfoResponse createOrder(CreateOrderRequest request, Long userId) {
         eventApi.validateEventIsPublished(request.eventId());
 
         List<OrderItem> orderItems = processOrderItems(request.items());
@@ -61,19 +61,19 @@ public class OrderService {
         return mapper.toOrderInfoResponseDto(order);
     }
 
-    private List<OrderItem> processOrderItems(List<OrderItemRequestDto> itemRequests) {
+    private List<OrderItem> processOrderItems(List<OrderItemRequest> itemRequests) {
         // sort by tier id to prevent deadlocks when locking tiers
         // If 2 threads
         // T1 (Order 1): lock tier 1 then tier 2
         // T2 (Order 2): lock tier 2 then tier 1
         // causes deadlock, so we sort by tier id to ensure consistent locking order
-        List<OrderItemRequestDto> sorted = itemRequests.stream()
-                .sorted(Comparator.comparing(OrderItemRequestDto::eventTierId))
+        List<OrderItemRequest> sorted = itemRequests.stream()
+                .sorted(Comparator.comparing(OrderItemRequest::eventTierId))
                 .toList();
 
         List<OrderItem> orderItems = new ArrayList<>();
 
-        for (OrderItemRequestDto item : sorted) {
+        for (OrderItemRequest item : sorted) {
 
             if (item.quantity() > maxOrderItemsPerOrder) {
                 throw new ValidationException("Too many tickets requested");
@@ -118,8 +118,8 @@ public class OrderService {
     }
 
     private void updateEventTierCounts(List<OrderItem> orderItems) {
-        List<AdjustSoldCountRequest> adjustments = orderItems.stream()
-                .map(item -> new AdjustSoldCountRequest(item.getEventTierId(), item.getQuantity()))
+        List<AdjustSoldCountData> adjustments = orderItems.stream()
+                .map(item -> new AdjustSoldCountData(item.getEventTierId(), item.getQuantity()))
                 .toList();
         eventApi.batchIncrementEventTierSoldCount(adjustments);
     }
@@ -131,14 +131,14 @@ public class OrderService {
     // TODO: move the cancellation logic to a separate method and call it from both
     // cancelOrder and cancelOrderOnPaymentFailure to avoid code duplication
     @Transactional
-    MessageResponseDto cancelOrder(Long orderId) {
-        Order order = orderRepository.findWithItemsByIdAndStatusForUpdate(orderId, OrderStatus.PENDING)
+    MessageResponse cancelOrder(Long orderId) {
+        Order order = orderRepository.findWithItemsForUpdateByIdAndStatus(orderId, OrderStatus.PENDING)
                 .orElseThrow(() -> new ValidationException("Order not found or already cancelled"));
 
         order.setStatus(OrderStatus.CANCELLED);
 
-        List<AdjustSoldCountRequest> adjustments = order.getItems().stream()
-                .map(item -> new AdjustSoldCountRequest(item.getEventTierId(), item.getQuantity()))
+        List<AdjustSoldCountData> adjustments = order.getItems().stream()
+                .map(item -> new AdjustSoldCountData(item.getEventTierId(), item.getQuantity()))
                 .toList();
         eventApi.batchDecrementEventTierSoldCount(adjustments);
 
@@ -151,17 +151,17 @@ public class OrderService {
         // Payment module handle it if it exists
         eventPublisher.publishEvent(new OrderCancelledEvent(order.getId()));
 
-        return new MessageResponseDto("Order cancelled successfully");
+        return new MessageResponse("Order cancelled successfully");
     }
 
     void cancelOrderOnPaymentFailure(Long orderId) {
-        Order order = orderRepository.findWithItemsByIdAndStatusForUpdate(orderId, OrderStatus.PENDING)
+        Order order = orderRepository.findWithItemsForUpdateByIdAndStatus(orderId, OrderStatus.PENDING)
                 .orElseThrow(() -> new ValidationException("Order not found or already cancelled"));
 
         order.setStatus(OrderStatus.CANCELLED);
 
-        List<AdjustSoldCountRequest> adjustments = order.getItems().stream()
-                .map(item -> new AdjustSoldCountRequest(item.getEventTierId(), item.getQuantity()))
+        List<AdjustSoldCountData> adjustments = order.getItems().stream()
+                .map(item -> new AdjustSoldCountData(item.getEventTierId(), item.getQuantity()))
                 .toList();
         eventApi.batchDecrementEventTierSoldCount(adjustments);
     }
@@ -201,8 +201,8 @@ public class OrderService {
                 .aggregateTiersByOrderIds(orderIds);
 
         if (!restoreViews.isEmpty()) {
-            List<AdjustSoldCountRequest> adjustments = restoreViews.stream()
-                    .map(aggregate -> new AdjustSoldCountRequest(aggregate.eventTierId(), aggregate.totalQuantity()))
+            List<AdjustSoldCountData> adjustments = restoreViews.stream()
+                    .map(aggregate -> new AdjustSoldCountData(aggregate.eventTierId(), aggregate.totalQuantity()))
                     .toList();
             eventApi.batchDecrementEventTierSoldCount(adjustments);
         }

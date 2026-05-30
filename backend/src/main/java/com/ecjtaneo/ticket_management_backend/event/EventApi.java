@@ -7,8 +7,8 @@ public interface EventApi {
 
     public EventTierBasicInfo lockEventTierForUpdate(Long id);
 
-    public void batchDecrementEventTierSoldCount(List<AdjustSoldCountRequest> adjustments);
+    public void batchDecrementEventTierSoldCount(List<AdjustSoldCountData> adjustments);
 
-    public void batchIncrementEventTierSoldCount(List<AdjustSoldCountRequest> adjustments);
+    public void batchIncrementEventTierSoldCount(List<AdjustSoldCountData> adjustments);
 
 }

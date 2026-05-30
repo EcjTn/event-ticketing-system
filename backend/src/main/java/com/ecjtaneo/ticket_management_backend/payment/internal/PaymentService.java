@@ -1,7 +1,7 @@
 package com.ecjtaneo.ticket_management_backend.payment.internal;
 
 import com.ecjtaneo.ticket_management_backend.payment.internal.model.Payment;
-import com.ecjtaneo.ticket_management_backend.payment.internal.dto.PaymentResponseDto;
+import com.ecjtaneo.ticket_management_backend.payment.internal.dto.PaymentResponse;
 import com.ecjtaneo.ticket_management_backend.payment.internal.model.PaymentStatus;
 import com.ecjtaneo.ticket_management_backend.shared.exceptions.ResourceNotFoundException;
 import com.ecjtaneo.ticket_management_backend.shared.exceptions.ValidationException;
@@ -39,7 +39,7 @@ public class PaymentService {
 
     // Stripe's payment intents are cancelled on-demand when the user tries to access an expired payment when fetching payment info on frontend.
     //TODO: use specific exceptions instead of generic ones and handle them in the module's controller advice.
-    PaymentResponseDto getPaymentInfoByOrderIdAndValid(Long orderId) throws StripeException {
+    PaymentResponse getPaymentInfoByOrderIdAndValid(Long orderId) throws StripeException {
         Payment payment = paymentRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Payment not found for order id: " + orderId));
 
@@ -51,7 +51,7 @@ public class PaymentService {
             throw new ValidationException("Payment has expired and is now cancelled");
         }
 
-        return new PaymentResponseDto(payment.getClientSecret(), payment.getStatus());
+        return new PaymentResponse(payment.getClientSecret(), payment.getStatus());
     }
 
     // Event handler for OrderCancelledEvent should call this method to cancel the payment intent.

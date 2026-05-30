@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 
 import com.ecjtaneo.ticket_management_backend.order.internal.model.OrderStatus;
 
-public record OrderInfoResponseDto(
+public record OrderInfoResponse(
         Long id,
         BigDecimal totalAmount,
         OrderStatus status,

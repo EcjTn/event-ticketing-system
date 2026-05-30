@@ -154,6 +154,7 @@ public class OrderService {
         return new MessageResponse("Order cancelled successfully");
     }
 
+    @Transactional
     void cancelOrderOnPaymentFailure(Long orderId) {
         Order order = orderRepository.findWithItemsForUpdateByIdAndStatus(orderId, OrderStatus.PENDING)
                 .orElseThrow(() -> new ValidationException("Order not found or already cancelled"));

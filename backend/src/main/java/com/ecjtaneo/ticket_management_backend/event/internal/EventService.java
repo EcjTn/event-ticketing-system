@@ -123,8 +123,11 @@ class EventService implements EventApi {
                                 WHERE id = ?
                                 """;
 
-                jdbcTemplate.batchUpdate(sql, adjustments, adjustments.size(),
-                                (PreparedStatement ps, AdjustSoldCountData adjustment) -> {
+                jdbcTemplate.batchUpdate(
+                        sql,
+                        adjustments,
+                        adjustments.size(),
+                        (ps, adjustment) -> {
                                         ps.setInt(1, adjustment.quantity());
                                         ps.setLong(2, adjustment.tierId());
                                 });

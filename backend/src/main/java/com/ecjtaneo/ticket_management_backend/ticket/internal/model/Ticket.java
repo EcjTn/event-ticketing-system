@@ -43,6 +43,7 @@ public class Ticket {
     private String uniqueCode;
     
     @Enumerated(EnumType.STRING)
+    @JdbcType(PostgreSQLEnumJdbcType.class)
     @Column(nullable = false)
     private TicketStatus status = TicketStatus.VALID;
     

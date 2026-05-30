@@ -38,6 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class OrderService {
     private final static long expirationCheckRateMs = 600_000; // 10 minutes
+    private final static int maxOrderItemsPerOrder = 5;
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final ApplicationEventPublisher eventPublisher;
@@ -71,7 +72,6 @@ public class OrderService {
                 .toList();
 
         List<OrderItem> orderItems = new ArrayList<>();
-        int maxOrderItemsPerOrder = 5;
 
         for (OrderItemRequestDto item : sorted) {
 
@@ -128,7 +128,8 @@ public class OrderService {
         return orderRepository.existsByIdAndUserId(orderId, userId);
     }
 
-    //TODO: move the cancellation logic to a separate method and call it from both cancelOrder and cancelOrderOnPaymentFailure to avoid code duplication
+    // TODO: move the cancellation logic to a separate method and call it from both
+    // cancelOrder and cancelOrderOnPaymentFailure to avoid code duplication
     @Transactional
     MessageResponseDto cancelOrder(Long orderId) {
         Order order = orderRepository.findWithItemsByIdAndStatusForUpdate(orderId, OrderStatus.PENDING)
@@ -176,7 +177,8 @@ public class OrderService {
 
         order.setStatus(OrderStatus.CONFIRMED);
 
-        // publish OrderConfirmedEvent so Tickets are created -- ticket module listens to this event to create tickets
+        // publish OrderConfirmedEvent so Tickets are created -- ticket module listens
+        // to this event to create tickets
         eventPublisher.publishEvent(new OrderConfirmedEvent(
                 order.getId(), order.getUserId(), order.getEventId(), order.getTotalAmount()));
     }
@@ -195,7 +197,8 @@ public class OrderService {
         }
 
         // Retrieve stock restore projections using the aggregate tiers query
-        List<EventTierQuantityAggregateProjection> restoreViews = orderItemRepository.aggregateTiersByOrderIds(orderIds);
+        List<EventTierQuantityAggregateProjection> restoreViews = orderItemRepository
+                .aggregateTiersByOrderIds(orderIds);
 
         if (!restoreViews.isEmpty()) {
             List<AdjustSoldCountRequest> adjustments = restoreViews.stream()

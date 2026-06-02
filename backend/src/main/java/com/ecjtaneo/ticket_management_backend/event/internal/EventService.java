@@ -43,7 +43,7 @@ class EventService implements EventApi {
 
         List<EventBasicInfoResponse> getEvents(Long lastSeenId) {
                 return mapper.toEventBasicInfoDtoList(
-                                eventRepository.findTop10ByIdLessThanOrderByIdDesc(lastSeenId));
+                                eventRepository.findTop10ByIdLessThanOrderByIdAndStatusDesc(lastSeenId, EventStatus.PUBLISHED));
         }
 
         EventInfoResponse getEventInfoById(Long id) {
@@ -59,6 +59,16 @@ class EventService implements EventApi {
                 eventInfoResponse.setAvailableTickets(totalAvailableTickets);
 
                 return eventInfoResponse;
+        }
+
+        MessageResponse updateEventStatus(Long id, EventStatus newStatus) {
+                Event event = eventRepository.findById(id)
+                                .orElseThrow(() -> new ResourceNotFoundException("Event not found with id: " + id));
+
+                event.setStatus(newStatus);
+                eventRepository.save(event);
+
+                return new MessageResponse("Event status updated to " + newStatus);
         }
 
         @Transactional

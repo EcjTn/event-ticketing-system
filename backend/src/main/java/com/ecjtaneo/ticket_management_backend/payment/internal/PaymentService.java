@@ -66,7 +66,6 @@ public class PaymentService {
         payment.setStatus(PaymentStatus.CANCELLED);
     }
 
-    //Used by payment event handler for OrderCreatedEvents
     @Transactional
     public void createPaymentOnOrderCreated(OrderCreatedEvent event) throws StripeException {
         // Create a payment intent with stripe

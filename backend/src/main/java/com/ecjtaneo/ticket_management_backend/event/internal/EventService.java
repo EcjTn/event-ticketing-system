@@ -43,7 +43,7 @@ class EventService implements EventApi {
 
         List<EventBasicInfoResponse> getEvents(Long lastSeenId) {
                 return mapper.toEventBasicInfoDtoList(
-                                eventRepository.findTop10ByIdLessThanOrderByIdAndStatusDesc(lastSeenId, EventStatus.PUBLISHED));
+                                eventRepository.findTop10ByIdAndStatusLessThanOrderByIdDesc(lastSeenId, EventStatus.PUBLISHED));
         }
 
         EventInfoResponse getEventInfoById(Long id) {

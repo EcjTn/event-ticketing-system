@@ -4,6 +4,7 @@ import com.ecjtaneo.ticket_management_backend.shared.dtos.MessageResponse;
 import com.ecjtaneo.ticket_management_backend.shared.events.OrderConfirmedEvent;
 import com.ecjtaneo.ticket_management_backend.shared.exceptions.ResourceNotFoundException;
 import com.ecjtaneo.ticket_management_backend.shared.exceptions.ValidationException;
+import com.ecjtaneo.ticket_management_backend.ticket.internal.dto.TicketValidationRequest;
 import com.ecjtaneo.ticket_management_backend.ticket.internal.model.Ticket;
 import com.ecjtaneo.ticket_management_backend.ticket.internal.model.TicketStatus;
 import lombok.RequiredArgsConstructor;
@@ -19,11 +20,11 @@ public class TicketService {
     private final JdbcTemplate jdbcTemplate;
 
     //separate logic..?
-    public MessageResponse validateAndUseTicket(String uniqueCode, Long eventId) {
-        Ticket ticket = ticketRepository.findByUniqueCodeForUpdate(uniqueCode)
-                .orElseThrow(() -> new ResourceNotFoundException("Ticket with code " + uniqueCode + " not found."));
+    public MessageResponse validateAndUseTicket(TicketValidationRequest ticketValidationRequest) {
+        Ticket ticket = ticketRepository.findByUniqueCodeForUpdate(ticketValidationRequest.uniqueCode())
+                .orElseThrow(() -> new ResourceNotFoundException("Ticket with code " + ticketValidationRequest.uniqueCode() + " not found."));
 
-        if (!ticket.getEventId().equals(eventId)) throw new ValidationException("Ticket is not valid for this event.");
+        if (!ticket.getEventId().equals(ticketValidationRequest.eventId())) throw new ValidationException("Ticket is not valid for this event.");
         if(ticket.getStatus() == TicketStatus.USED) throw new ValidationException("Ticket has already been used.");
 
         ticket.setStatus(TicketStatus.USED);

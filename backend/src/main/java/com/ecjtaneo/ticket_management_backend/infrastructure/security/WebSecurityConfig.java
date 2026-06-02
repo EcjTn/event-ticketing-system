@@ -54,6 +54,7 @@ class WebSecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/events").permitAll()
                         .requestMatchers(HttpMethod.POST, "/events").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/events/**").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/tickets/**").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/payments/webhook").permitAll()
                         .anyRequest().authenticated())
 

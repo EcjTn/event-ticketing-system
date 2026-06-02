@@ -18,6 +18,7 @@ public class TicketService {
     private final TicketRepository ticketRepository;
     private final JdbcTemplate jdbcTemplate;
 
+    //separate logic..?
     public MessageResponse validateAndUseTicket(String uniqueCode, Long eventId) {
         Ticket ticket = ticketRepository.findByUniqueCodeForUpdate(uniqueCode)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket with code " + uniqueCode + " not found."));
@@ -25,7 +26,6 @@ public class TicketService {
         if (!ticket.getEventId().equals(eventId)) throw new ValidationException("Ticket is not valid for this event.");
         if(ticket.getStatus() == TicketStatus.USED) throw new ValidationException("Ticket has already been used.");
 
-        // Mark the ticket as used
         ticket.setStatus(TicketStatus.USED);
         ticketRepository.save(ticket);
 

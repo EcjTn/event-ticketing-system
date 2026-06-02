@@ -13,7 +13,7 @@ public class OrderEventHandler {
 
     @ApplicationModuleListener
     void onPaymentSucceeded(PaymentSucceededEvent event) {
-        orderService.confirmOrder(event.orderId());
+        orderService.confirmOrderOnPaymentSucceeded(event.orderId());
     }
 
     @ApplicationModuleListener

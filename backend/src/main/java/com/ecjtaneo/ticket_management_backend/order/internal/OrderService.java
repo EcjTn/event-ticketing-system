@@ -167,7 +167,7 @@ public class OrderService {
     }
 
     @Transactional
-    void confirmOrder(Long orderId) {
+    void confirmOrderOnPaymentSucceeded(Long orderId) {
         Order order = orderRepository.findByIdForUpdate(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
 

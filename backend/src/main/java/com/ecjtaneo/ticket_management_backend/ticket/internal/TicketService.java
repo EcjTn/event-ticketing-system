@@ -15,7 +15,7 @@ public class TicketService {
 
     //TODO: add ticket validation method to check if its valid for the event.
 
-    public void createTickets(OrderConfirmedEvent event) {
+    public void createTicketsOnOrderConfirmed(OrderConfirmedEvent event) {
         // ?::ticket_tier is used to cast the string value to the enum type in PostgreSQL.
         String sql = """
                 INSERT INTO tickets (order_id, user_id, event_id, tier, price_paid, unique_code)

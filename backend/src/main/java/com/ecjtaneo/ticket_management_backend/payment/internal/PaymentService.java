@@ -56,7 +56,7 @@ public class PaymentService {
 
     // Event handler for OrderCancelledEvent should call this method to cancel the payment intent.
     @Transactional
-    public void cancelPaymentByOrderId(Long orderId) throws StripeException {
+    public void cancelPaymentByOrderIdOnOrderCancelled(Long orderId) throws StripeException {
         Payment payment = paymentRepository.findByOrderIdForUpdate(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Payment not found for order id: " + orderId));
 
@@ -68,7 +68,7 @@ public class PaymentService {
 
     //Used by payment event handler for OrderCreatedEvents
     @Transactional
-    public void createPayment(OrderCreatedEvent event) throws StripeException {
+    public void createPaymentOnOrderCreated(OrderCreatedEvent event) throws StripeException {
         // Create a payment intent with stripe
         PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
                 .setAmount(event.amount().longValueExact())
@@ -93,7 +93,7 @@ public class PaymentService {
     }
 
     @Transactional
-    public void cancelPayments(List<Long> orderIds) throws StripeException {
+    public void cancelPaymentsOnOrdersBatchExpired(List<Long> orderIds) throws StripeException {
         if (orderIds == null || orderIds.isEmpty()) return;
 
         log.info("Bulk cancelling payments for order IDs: {}", orderIds);

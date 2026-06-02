@@ -16,17 +16,17 @@ class PaymentEventHandler {
 
     @ApplicationModuleListener
     void onOrderCreated(OrderCreatedEvent event) throws StripeException {
-        paymentService.createPayment(event);
+        paymentService.createPaymentOnOrderCreated(event);
     }
 
     @ApplicationModuleListener
     void onOrderCancelled(OrderCancelledEvent event) throws StripeException {
-        paymentService.cancelPaymentByOrderId(event.orderId());
+        paymentService.cancelPaymentByOrderIdOnOrderCancelled(event.orderId());
     }
 
     @ApplicationModuleListener
     void onOrdersBatchExpired(OrdersBatchExpiredEvent event) throws StripeException {
-        paymentService.cancelPayments(event.orderIds());
+        paymentService.cancelPaymentsOnOrdersBatchExpired(event.orderIds());
     }
 
 }

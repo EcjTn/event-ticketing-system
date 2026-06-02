@@ -25,7 +25,7 @@ public class TicketService {
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket with code " + ticketValidationRequest.uniqueCode() + " not found."));
 
         if (!ticket.getEventId().equals(ticketValidationRequest.eventId())) throw new ValidationException("Ticket is not valid for this event.");
-        if(ticket.getStatus() == TicketStatus.USED) throw new ValidationException("Ticket has already been used.");
+        if(ticket.getStatus() == TicketStatus.USED || ticket.getStatus() == TicketStatus.CANCELLED) throw new ValidationException("Ticket has already been used.");
 
         ticket.setStatus(TicketStatus.USED);
         ticketRepository.save(ticket);

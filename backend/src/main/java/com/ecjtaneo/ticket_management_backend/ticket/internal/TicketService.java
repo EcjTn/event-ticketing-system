@@ -1,6 +1,11 @@
 package com.ecjtaneo.ticket_management_backend.ticket.internal;
 
+import com.ecjtaneo.ticket_management_backend.shared.dtos.MessageResponse;
 import com.ecjtaneo.ticket_management_backend.shared.events.OrderConfirmedEvent;
+import com.ecjtaneo.ticket_management_backend.shared.exceptions.ResourceNotFoundException;
+import com.ecjtaneo.ticket_management_backend.shared.exceptions.ValidationException;
+import com.ecjtaneo.ticket_management_backend.ticket.internal.model.Ticket;
+import com.ecjtaneo.ticket_management_backend.ticket.internal.model.TicketStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -13,7 +18,19 @@ public class TicketService {
     private final TicketRepository ticketRepository;
     private final JdbcTemplate jdbcTemplate;
 
-    //TODO: add ticket validation method to check if its valid for the event.
+    public MessageResponse validateAndUseTicket(String uniqueCode, Long eventId) {
+        Ticket ticket = ticketRepository.findByUniqueCodeForUpdate(uniqueCode)
+                .orElseThrow(() -> new ResourceNotFoundException("Ticket with code " + uniqueCode + " not found."));
+
+        if (!ticket.getEventId().equals(eventId)) throw new ValidationException("Ticket is not valid for this event.");
+        if(ticket.getStatus() == TicketStatus.USED) throw new ValidationException("Ticket has already been used.");
+
+        // Mark the ticket as used
+        ticket.setStatus(TicketStatus.USED);
+        ticketRepository.save(ticket);
+
+        return new MessageResponse("Ticket validated successfully.");
+    }
 
     public void createTicketsOnOrderConfirmed(OrderConfirmedEvent event) {
         // ?::ticket_tier is used to cast the string value to the enum type in PostgreSQL.

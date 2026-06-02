@@ -38,7 +38,6 @@ public class PaymentService {
     private String webhookSecret;
 
     // Stripe's payment intents are cancelled on-demand when the user tries to access an expired payment when fetching payment info on frontend.
-    //TODO: use specific exceptions instead of generic ones and handle them in the module's controller advice.
     PaymentResponse getPaymentInfoByOrderIdAndValid(Long orderId) throws StripeException {
         Payment payment = paymentRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Payment not found for order id: " + orderId));
@@ -48,7 +47,7 @@ public class PaymentService {
             stripeClient.v1().paymentIntents().cancel(payment.getPaymentIntentId());
             payment.setStatus(PaymentStatus.CANCELLED);
 
-            throw new ValidationException("Payment has expired and is now cancelled");
+            throw new PaymentExpiredException("Payment has expired and is now cancelled");
         }
 
         return new PaymentResponse(payment.getClientSecret(), payment.getStatus());

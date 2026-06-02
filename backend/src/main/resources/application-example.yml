@@ -1,6 +1,9 @@
 spring:
   application:
     name: event-ticketing-backend
+  output:
+    ansi:
+      enabled: ALWAYS
 
   threads:
     virtual:

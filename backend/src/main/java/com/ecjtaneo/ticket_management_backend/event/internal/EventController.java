@@ -3,6 +3,7 @@ package com.ecjtaneo.ticket_management_backend.event.internal;
 import com.ecjtaneo.ticket_management_backend.event.internal.dto.CreateEventRequest;
 import com.ecjtaneo.ticket_management_backend.event.internal.dto.EventBasicInfoResponse;
 import com.ecjtaneo.ticket_management_backend.event.internal.dto.EventInfoResponse;
+import com.ecjtaneo.ticket_management_backend.event.internal.model.EventStatus;
 import com.ecjtaneo.ticket_management_backend.shared.annotations.CurrentUserId;
 import com.ecjtaneo.ticket_management_backend.shared.dtos.MessageResponse;
 import jakarta.validation.Valid;
@@ -37,4 +38,24 @@ class EventController {
                                 @RequestPart("image") MultipartFile image, @CurrentUserId Long userId) throws IOException {
         return service.createEvent(dto, image, userId);
     }
+
+
+
+    //FOR ADMIN USE ONLY
+
+    @PatchMapping("/{id}/cancel")
+    MessageResponse cancelEvent(@PathVariable Long id) {
+        return service.updateEventStatus(id, EventStatus.CANCELLED);
+    }
+
+    @PatchMapping("/{id}/publish")
+    MessageResponse publishEvent(@PathVariable Long id) {
+        return service.updateEventStatus(id, EventStatus.PUBLISHED);
+    }
+
+    @PatchMapping("/{id}/complete")
+    MessageResponse completeEvent(@PathVariable Long id) {
+        return service.updateEventStatus(id, EventStatus.COMPLETED);
+    }
+
 }

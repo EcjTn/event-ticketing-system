@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import com.ecjtaneo.ticket_management_backend.event.EventBasicInfo;
 import com.ecjtaneo.ticket_management_backend.order.internal.dto.OrderInfoResponse;
 import com.ecjtaneo.ticket_management_backend.shared.events.OrderCancelledEvent;
 import com.ecjtaneo.ticket_management_backend.shared.events.OrderConfirmedEvent;
@@ -47,12 +48,20 @@ public class OrderService {
 
     @Transactional
     OrderInfoResponse createOrder(CreateOrderRequest request, Long userId) {
-        eventApi.validateEventIsPublished(request.eventId());
+        EventBasicInfo eventInfo = eventApi.validateEventIsPublished(request.eventId());
 
         List<OrderItem> orderItems = processOrderItems(request.items());
         BigDecimal totalAmount = calculateTotalAmount(orderItems);
 
-        Order order = buildAndSaveOrder(request.eventId(), userId, totalAmount);
+        //Note that ONE Order always have the same Event.
+        Order order = new Order(); // reminder default status = PENDING
+        order.setEventName(eventInfo.name()); // Denormalized for easier access when displaying Order history/details.
+        order.setUserId(userId);
+        order.setEventId(eventInfo.id());
+        order.setTotalAmount(totalAmount);
+        order.setExpiresAt(LocalDateTime.now().plusMinutes(15));
+        orderRepository.save(order);
+
         saveOrderItems(orderItems, order);
         updateEventTierCounts(orderItems);
 
@@ -101,15 +110,6 @@ public class OrderService {
         return orderItems.stream()
                 .map(item -> item.getUnitPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
-
-    private Order buildAndSaveOrder(Long eventId, Long userId, BigDecimal totalAmount) {
-        Order order = new Order(); // reminder default status = PENDING
-        order.setUserId(userId);
-        order.setEventId(eventId);
-        order.setTotalAmount(totalAmount);
-        order.setExpiresAt(LocalDateTime.now().plusMinutes(15));
-        return orderRepository.save(order);
     }
 
     private void saveOrderItems(List<OrderItem> orderItems, Order order) {

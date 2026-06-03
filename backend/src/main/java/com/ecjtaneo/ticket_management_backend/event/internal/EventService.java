@@ -1,6 +1,7 @@
 package com.ecjtaneo.ticket_management_backend.event.internal;
 
 import com.ecjtaneo.ticket_management_backend.event.EventApi;
+import com.ecjtaneo.ticket_management_backend.event.EventBasicInfo;
 import com.ecjtaneo.ticket_management_backend.event.EventTierBasicInfo;
 import com.ecjtaneo.ticket_management_backend.event.AdjustSoldCountData;
 import com.ecjtaneo.ticket_management_backend.event.internal.dto.CreateEventRequest;
@@ -96,12 +97,16 @@ class EventService implements EventApi {
         // For validation/existence checks (public)
 
         @Override
-        public void validateEventIsPublished(Long id) {
+        public EventBasicInfo validateEventIsPublished(Long id) {
                 Event event = eventRepository.findById(id)
                                 .orElseThrow(() -> new ResourceNotFoundException("Event not found"));
 
                 if (event.getStatus() != EventStatus.PUBLISHED)
                         throw new ValidationException("Event is not available");
+
+                //return event name for OrderService's snapshotting purpose,
+                // useful when showing Order Details instead of table joins or additional queries(expensive)
+                return new EventBasicInfo(event.getId(), event.getName());
         }
 
         @Override

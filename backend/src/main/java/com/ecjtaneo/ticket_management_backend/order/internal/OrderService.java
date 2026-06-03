@@ -48,7 +48,7 @@ public class OrderService {
 
     @Transactional
     OrderInfoResponse createOrder(CreateOrderRequest request, Long userId) {
-        EventBasicInfo eventInfo = eventApi.validateEventIsPublished(request.eventId());
+        EventBasicInfo eventInfo = eventApi.getPublishedEventInfo(request.eventId());
 
         List<OrderItem> orderItems = processOrderItems(request.items());
         BigDecimal totalAmount = calculateTotalAmount(orderItems);

@@ -97,7 +97,7 @@ class EventService implements EventApi {
         // For validation/existence checks (public)
 
         @Override
-        public EventBasicInfo validateEventIsPublished(Long id) {
+        public EventBasicInfo getPublishedEventInfo(Long id) {
                 Event event = eventRepository.findById(id)
                                 .orElseThrow(() -> new ResourceNotFoundException("Event not found"));
 

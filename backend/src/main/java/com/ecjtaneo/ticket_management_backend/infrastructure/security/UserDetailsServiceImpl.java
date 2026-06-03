@@ -15,7 +15,7 @@ class UserDetailsServiceImpl implements UserDetailsService {
     
     @Override
     public UserDetailsImpl loadUserByUsername(String username) {
-        UserBasicInfo userBasicInfo = userApi.getUserBasicInfo(username);
+        UserBasicInfo userBasicInfo = userApi.getUserInfo(username);
         return new UserDetailsImpl(userBasicInfo);
     }
 }

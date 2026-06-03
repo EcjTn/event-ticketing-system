@@ -31,7 +31,7 @@ class UserService implements UserApi {
     }
 
     @Override
-    public UserBasicInfo getUserBasicInfo(String name) {
+    public UserBasicInfo getUserInfo(String name) {
         User user = repository.findByName(name)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         return mapper.toBasicInfo(user);

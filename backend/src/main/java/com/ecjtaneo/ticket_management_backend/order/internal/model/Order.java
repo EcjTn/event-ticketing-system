@@ -25,6 +25,9 @@ public class Order {
     
     @Column(name = "event_id", nullable = false)
     private Long eventId;
+
+    @Column(name = "event_name", nullable = false, unique = true, length = 255)
+    private String eventName; // Added to store event name at the time of order creation (snapshot)
     
     @Enumerated(EnumType.STRING)
     @JdbcType(PostgreSQLEnumJdbcType.class)

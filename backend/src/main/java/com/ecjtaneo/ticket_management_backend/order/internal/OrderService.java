@@ -57,7 +57,7 @@ public class OrderService {
         Order order = new Order(); // reminder default status = PENDING
         order.setEventName(eventInfo.name()); // Denormalized for easier access when displaying Order history/details.
         order.setUserId(userId);
-        order.setEventId(eventInfo.id());
+        order.setEventId(eventInfo.id()); //source of truth for which Event this Order belongs to, used for Navigation from Order to Event details page(frontend)
         order.setTotalAmount(totalAmount);
         order.setExpiresAt(LocalDateTime.now().plusMinutes(15));
         orderRepository.save(order);

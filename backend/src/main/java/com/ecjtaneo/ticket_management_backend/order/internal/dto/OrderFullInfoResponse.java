@@ -1,7 +1,6 @@
 package com.ecjtaneo.ticket_management_backend.order.internal.dto;
 
 import com.ecjtaneo.ticket_management_backend.order.internal.model.OrderStatus;
-import org.springframework.cglib.core.Local;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -15,6 +14,6 @@ public record OrderFullInfoResponse(
         BigDecimal totalAmount,
         LocalDateTime createdAt,
         LocalDateTime expiresAt,
-        List<OrderItemInfo> items
+        List<OrderItemInfoResponse> items
 ) {
 }

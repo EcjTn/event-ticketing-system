@@ -19,6 +19,9 @@ import org.springframework.data.repository.query.Param;
 public interface OrderRepository extends JpaRepository<Order, Long> {
     boolean existsByIdAndUserId(Long id, Long userId);
 
+    @EntityGraph(attributePaths = { "items" })
+    Optional<Order> findWithItemsByIdAndUserId(Long id, Long userId);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @EntityGraph(attributePaths = { "items" })
     Optional<Order> findWithItemsForUpdateByIdAndStatus(Long id, OrderStatus status);

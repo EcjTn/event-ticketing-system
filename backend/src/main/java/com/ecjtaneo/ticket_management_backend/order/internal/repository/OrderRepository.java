@@ -30,6 +30,9 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("SELECT o FROM Order o WHERE o.id = :id")
     Optional<Order> findByIdForUpdate(Long id);
 
+    List<Order> findTop10ByUserIdAndStatusOrderByIdDesc(Long userId, OrderStatus status);
+    List<Order> findTop10ByUserIdAndStatusLessThanOrderByIdDesc(Long userId, OrderStatus status);
+
     // Trying out new method for batch cancelling -- now not used, switched to v2 below
 //    @Query(value = """
 //            WITH cancelled AS (

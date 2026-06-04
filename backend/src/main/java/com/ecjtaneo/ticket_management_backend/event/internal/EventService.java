@@ -118,7 +118,7 @@ class EventService implements EventApi {
                                 .orElseThrow(() -> new ResourceNotFoundException("Event tier not found"));
 
                 if(eventTier.getSoldCount() >= eventTier.getQuantity()) {
-                        throw new OutOfStockException("Event tier " + eventTier.getTier() + " is out of stock");
+                        throw new EventTierOutOfStockException("Event tier " + eventTier.getTier() + " is out of stock");
                 }
 
                 return mapper.toEventTierBasicInfo(eventTier);

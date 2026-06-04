@@ -1,7 +1,12 @@
 package com.ecjtaneo.ticket_management_backend.payment.internal;
 
-public class PaymentExpiredException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+import org.springframework.web.ErrorResponseException;
+
+public class PaymentExpiredException extends ErrorResponseException {
     public PaymentExpiredException(String message) {
-        super(message);
+        super(HttpStatus.GONE);
+        this.setTitle("Payment Expired");
+        this.setDetail(message);
     }
 }

@@ -184,7 +184,7 @@ public class OrderService {
                 order.getEventId(),
                 order.getItems()
                         .stream()
-                        .map(item -> new OrderConfirmedEvent.OrderBasicInfo(item.getTier(), item.getUnitPrice()))
+                        .map(item -> new OrderConfirmedEvent.OrderItemBasicInfo(item.getTier(), item.getUnitPrice()))
                         .toList()
         ));
 

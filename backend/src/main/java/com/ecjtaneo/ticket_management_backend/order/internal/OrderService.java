@@ -7,7 +7,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import com.ecjtaneo.ticket_management_backend.event.EventBasicInfo;
-import com.ecjtaneo.ticket_management_backend.order.internal.dto.OrderInfoResponse;
+import com.ecjtaneo.ticket_management_backend.order.internal.dto.*;
 import com.ecjtaneo.ticket_management_backend.shared.events.OrderCancelledEvent;
 import com.ecjtaneo.ticket_management_backend.shared.events.OrderConfirmedEvent;
 import com.ecjtaneo.ticket_management_backend.shared.exceptions.ResourceNotFoundException;
@@ -20,8 +20,6 @@ import com.ecjtaneo.ticket_management_backend.event.EventTierBasicInfo;
 import com.ecjtaneo.ticket_management_backend.event.AdjustSoldCountData;
 import com.ecjtaneo.ticket_management_backend.shared.events.OrderCreatedEvent;
 import com.ecjtaneo.ticket_management_backend.shared.events.OrdersBatchExpiredEvent;
-import com.ecjtaneo.ticket_management_backend.order.internal.dto.CreateOrderRequest;
-import com.ecjtaneo.ticket_management_backend.order.internal.dto.OrderItemRequest;
 import com.ecjtaneo.ticket_management_backend.order.internal.model.Order;
 import com.ecjtaneo.ticket_management_backend.order.internal.model.OrderItem;
 import com.ecjtaneo.ticket_management_backend.order.internal.model.OrderStatus;
@@ -188,6 +186,25 @@ public class OrderService {
                         .toList()
         ));
 
+    }
+
+    List<OrderBasicInfoResponse> getPendingOrdersForUser(Long userId) {
+        return mapper.toOrderBasicInfoResponseDtoList(
+                orderRepository.findTop10ByUserIdAndStatusOrderByIdDesc(userId, OrderStatus.PENDING)
+        );
+    }
+
+    List<OrderBasicInfoResponse> getPendingOrdersForUser(Long userId, Long lastSeenId) {
+        return mapper.toOrderBasicInfoResponseDtoList(
+                orderRepository.findTop10ByUserIdAndStatusAndIdLessThanOrderByIdDesc(userId, OrderStatus.PENDING, lastSeenId)
+        );
+    }
+
+    OrderFullInfoResponse getOrderDetailsForUser(Long orderId, Long userId) {
+        return mapper.toOrderFullInfoResponseDto(
+                orderRepository.findWithItemsByIdAndUserId(orderId, userId)
+                        .orElseThrow(() -> new ResourceNotFoundException("Order not found"))
+        );
     }
 
     @Scheduled(fixedDelay = expirationCheckRateMs)

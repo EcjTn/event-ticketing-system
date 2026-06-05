@@ -31,7 +31,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     Optional<Order> findByIdForUpdate(Long id);
 
     List<Order> findTop10ByUserIdAndStatusOrderByIdDesc(Long userId, OrderStatus status);
-    List<Order> findTop10ByUserIdAndStatusLessThanOrderByIdDesc(Long userId, OrderStatus status);
+    List<Order> findTop10ByUserIdAndStatusAndIdLessThanOrderByIdDesc(Long userId, OrderStatus status, Long lastSeenId);
 
     // Trying out new method for batch cancelling -- now not used, switched to v2 below
 //    @Query(value = """

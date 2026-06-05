@@ -15,6 +15,7 @@ interface TicketRepository extends JpaRepository<Ticket, Long> {
     @Query("SELECT t FROM Ticket t WHERE t.uniqueCode = :uniqueCode")
     public Optional<Ticket> findByUniqueCodeForUpdate(String uniqueCode);
 
-    public List<Ticket> findByUserId(Long userId);
+    public List<Ticket> findTop10ByUserIdOrderByIdDesc(Long userId);
+    public List<Ticket> findTop10ByUserIdAndIdLessThanOrderByIdDesc(Long userId, Long lastSeenId);
 
 }

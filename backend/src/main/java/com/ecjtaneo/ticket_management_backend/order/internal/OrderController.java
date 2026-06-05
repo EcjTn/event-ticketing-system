@@ -23,9 +23,9 @@ class OrderController {
     // Stopping at PENDING orders for now. Add more endpoints for COMPLETED/CANCELLED orders if needed.
     @GetMapping("/pending")
     List<OrderBasicInfoResponse> getPendingOrders(@CurrentUserId Long userId, @RequestParam(name = "cursor", required = false) Long lastSeenId) {
-        if(lastSeenId != null)
-            return orderService.getPendingOrdersForUser(userId, lastSeenId);
-        return orderService.getPendingOrdersForUser(userId);
+        if(lastSeenId == null)
+            return orderService.getPendingOrdersForUser(userId);
+        return orderService.getPendingOrdersForUser(userId, lastSeenId);
     }
 
     @GetMapping("/pending/{orderId}")

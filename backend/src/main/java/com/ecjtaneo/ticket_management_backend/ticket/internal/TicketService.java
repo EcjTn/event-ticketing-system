@@ -4,6 +4,7 @@ import com.ecjtaneo.ticket_management_backend.shared.dtos.MessageResponse;
 import com.ecjtaneo.ticket_management_backend.shared.events.OrderConfirmedEvent;
 import com.ecjtaneo.ticket_management_backend.shared.exceptions.ResourceNotFoundException;
 import com.ecjtaneo.ticket_management_backend.shared.exceptions.ValidationException;
+import com.ecjtaneo.ticket_management_backend.ticket.internal.dto.TicketInfoResponse;
 import com.ecjtaneo.ticket_management_backend.ticket.internal.dto.TicketValidationRequest;
 import com.ecjtaneo.ticket_management_backend.ticket.internal.model.Ticket;
 import com.ecjtaneo.ticket_management_backend.ticket.internal.model.TicketStatus;
@@ -11,16 +12,18 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class TicketService {
     private final TicketRepository ticketRepository;
+    private final TicketMapper mapper;
     private final JdbcTemplate jdbcTemplate;
 
     //separate logic..?
-    public MessageResponse validateAndUseTicket(TicketValidationRequest ticketValidationRequest) {
+    MessageResponse validateAndUseTicket(TicketValidationRequest ticketValidationRequest) {
         Ticket ticket = ticketRepository.findByUniqueCodeForUpdate(ticketValidationRequest.uniqueCode())
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket with code " + ticketValidationRequest.uniqueCode() + " not found."));
 
@@ -33,7 +36,19 @@ public class TicketService {
         return new MessageResponse("Ticket validated successfully.");
     }
 
-    public void createTicketsOnOrderConfirmed(OrderConfirmedEvent event) {
+    List<TicketInfoResponse> getTicketsForUser(Long userId) {
+        return mapper.toTicketInfoResponse(
+                ticketRepository.findTop10ByUserIdOrderByIdDesc(userId)
+        );
+    }
+
+    List<TicketInfoResponse> getTicketsForUser(Long userId, Long lastSeenId) {
+        return mapper.toTicketInfoResponse(
+                ticketRepository.findTop10ByUserIdAndIdLessThanOrderByIdDesc(userId, lastSeenId)
+        );
+    }
+
+    void createTicketsOnOrderConfirmed(OrderConfirmedEvent event) {
         // ?::ticket_tier is used to cast the string value to the enum type in PostgreSQL.
         String sql = """
                 INSERT INTO tickets (order_id, user_id, event_id, tier, price_paid, unique_code, event_name)

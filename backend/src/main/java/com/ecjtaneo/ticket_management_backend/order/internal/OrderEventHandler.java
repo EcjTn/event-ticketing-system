@@ -13,11 +13,13 @@ public class OrderEventHandler {
 
     @ApplicationModuleListener
     void onPaymentSucceeded(PaymentSucceededEvent event) {
+        if(event == null) return;
         orderService.confirmOrderOnPaymentSucceeded(event.orderId());
     }
 
     @ApplicationModuleListener
     void onPaymentFailed(PaymentFailedEvent event) {
+        if(event == null) return;
         orderService.cancelOrderOnPaymentFailure(event.orderId());
     }
 

@@ -12,6 +12,7 @@ public class TicketEventHandler {
 
     @ApplicationModuleListener
     public void onOrderConfirmed(OrderConfirmedEvent event) {
+        if(event == null) return;
         ticketService.createTicketsOnOrderConfirmed(event);
     }
 

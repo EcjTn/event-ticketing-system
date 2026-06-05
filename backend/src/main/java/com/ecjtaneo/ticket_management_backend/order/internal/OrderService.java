@@ -200,9 +200,9 @@ public class OrderService {
         );
     }
 
-    OrderFullInfoResponse getOrderDetailsForUser(Long orderId, Long userId) {
+    OrderFullInfoResponse getPendingOrderDetailsForUser(Long orderId, Long userId) {
         return mapper.toOrderFullInfoResponseDto(
-                orderRepository.findWithItemsByIdAndUserId(orderId, userId)
+                orderRepository.findWithItemsByIdAndUserIdAndStatus(orderId, userId, OrderStatus.PENDING)
                         .orElseThrow(() -> new ResourceNotFoundException("Order not found"))
         );
     }

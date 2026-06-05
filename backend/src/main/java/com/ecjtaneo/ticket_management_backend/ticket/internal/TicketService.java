@@ -36,8 +36,8 @@ public class TicketService {
     public void createTicketsOnOrderConfirmed(OrderConfirmedEvent event) {
         // ?::ticket_tier is used to cast the string value to the enum type in PostgreSQL.
         String sql = """
-                INSERT INTO tickets (order_id, user_id, event_id, tier, price_paid, unique_code)
-                VALUES (?, ?, ?, ?::ticket_tier, ?, ?)
+                INSERT INTO tickets (order_id, user_id, event_id, tier, price_paid, unique_code, event_name)
+                VALUES (?, ?, ?, ?::ticket_tier, ?, ?, ?)
                 """;
 
         jdbcTemplate.batchUpdate(
@@ -53,6 +53,7 @@ public class TicketService {
                     ps.setString(4, items.tier().name());
                     ps.setBigDecimal(5, items.price());
                     ps.setString(6, ticketUniqueCode);
+                    ps.setString(7, event.eventName());
                 }
         );
 

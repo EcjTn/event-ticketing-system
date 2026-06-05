@@ -6,6 +6,7 @@ import com.ecjtaneo.ticket_management_backend.ticket.internal.model.Ticket;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
 import java.util.Optional;
 
 interface TicketRepository extends JpaRepository<Ticket, Long> {
@@ -13,5 +14,7 @@ interface TicketRepository extends JpaRepository<Ticket, Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT t FROM Ticket t WHERE t.uniqueCode = :uniqueCode")
     public Optional<Ticket> findByUniqueCodeForUpdate(String uniqueCode);
+
+    public List<Ticket> findByUserId(Long userId);
 
 }

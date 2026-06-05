@@ -30,6 +30,9 @@ public class Ticket {
     
     @Column(name = "event_id", nullable = false)
     private Long eventId;
+
+    @Column(name = "event_name", nullable = false, length = 255)
+    String eventName;
     
     @Enumerated(EnumType.STRING)
     @JdbcType(PostgreSQLEnumJdbcType.class)

@@ -180,6 +180,7 @@ public class OrderService {
                 orderId,
                 order.getUserId(),
                 order.getEventId(),
+                order.getEventName(),
                 order.getItems()
                         .stream()
                         .map(item -> new OrderConfirmedEvent.OrderItemBasicInfo(item.getTier(), item.getUnitPrice()))

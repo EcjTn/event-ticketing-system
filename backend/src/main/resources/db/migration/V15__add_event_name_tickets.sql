@@ -1,0 +1,1 @@
+ALTER TABLE ticket ADD COLUMN event_name VARCHAR(255) NOT NULL;

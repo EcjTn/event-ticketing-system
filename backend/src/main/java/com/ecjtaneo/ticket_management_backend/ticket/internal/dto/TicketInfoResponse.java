@@ -1,6 +1,7 @@
 package com.ecjtaneo.ticket_management_backend.ticket.internal.dto;
 
 import com.ecjtaneo.ticket_management_backend.event.internal.model.EventTier;
+import com.ecjtaneo.ticket_management_backend.shared.enums.TicketTier;
 import com.ecjtaneo.ticket_management_backend.ticket.internal.model.TicketStatus;
 
 import java.math.BigDecimal;
@@ -11,7 +12,7 @@ public record TicketInfoResponse(
         Long orderId,
         Long eventId,
         String eventName,
-        EventTier tier,
+        TicketTier tier,
         TicketStatus status,
         BigDecimal pricePaid,
         String uniqueCode,

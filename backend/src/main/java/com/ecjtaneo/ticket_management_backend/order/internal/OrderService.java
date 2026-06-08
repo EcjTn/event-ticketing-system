@@ -87,7 +87,7 @@ public class OrderService {
             }
 
             // Locks the event tier on this call
-            EventTierBasicInfo tier = eventApi.lockEventTierForUpdate(item.eventTierId());
+            EventTierBasicInfo tier = eventApi.getLockEventTierForUpdate(item.eventTierId());
             Integer available = tier.quantity() - tier.soldCount();
 
             if (available < item.quantity()) {

@@ -111,7 +111,7 @@ class EventService implements EventApi {
 
         @Override
         @Transactional
-        public EventTierBasicInfo lockEventTierForUpdate(Long id) {
+        public EventTierBasicInfo getLockEventTierForUpdate(Long id) {
                 // Pessimistic Lock the event tier for update to prevent race conditions
                 // Lock is released when the caller's transaction ends (order service)
                 EventTier eventTier = eventTierRepository.findByIdForUpdate(id)

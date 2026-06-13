@@ -19,6 +19,8 @@ import com.ecjtaneo.ticket_management_backend.shared.exceptions.ResourceNotFound
 import com.ecjtaneo.ticket_management_backend.shared.exceptions.ValidationException;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,16 +39,19 @@ class EventService implements EventApi {
         private final EventMapper mapper;
         private final StorageApi storageApi;
 
+        @Cacheable("events")
         List<EventBasicInfoResponse> getEvents() {
                 return mapper.toEventBasicInfoDtoList(
                                 eventRepository.findTop10ByStatusOrderByIdDesc(EventStatus.PUBLISHED));
         }
 
+        @Cacheable(value = "events", key = "#lastSeenId")
         List<EventBasicInfoResponse> getEvents(Long lastSeenId) {
                 return mapper.toEventBasicInfoDtoList(
                                 eventRepository.findTop10ByIdLessThanAndStatusOrderByIdDesc(lastSeenId, EventStatus.PUBLISHED));
         }
 
+        @Cacheable(value = "eventInfo", key = "#id")
         EventInfoResponse getEventInfoById(Long id) {
                 Event event = eventRepository.findWithTiersById(id)
                                 .orElseThrow(() -> new ResourceNotFoundException("Event not found with id: " + id));
@@ -62,6 +67,7 @@ class EventService implements EventApi {
                 return eventInfoResponse;
         }
 
+        @CacheEvict(value = "eventInfo", key = "#id")
         MessageResponse updateEventStatus(Long id, EventStatus newStatus) {
                 Event event = eventRepository.findById(id)
                                 .orElseThrow(() -> new ResourceNotFoundException("Event not found with id: " + id));
@@ -73,8 +79,7 @@ class EventService implements EventApi {
         }
 
         @Transactional
-        MessageResponse createEvent(CreateEventRequest dto, MultipartFile image, Long createdBy)
-                        throws IOException {
+        MessageResponse createEvent(CreateEventRequest dto, MultipartFile image, Long createdBy) throws IOException {
                 Event event = mapper.toEvent(dto);
                 event.setCreatedBy(createdBy);
                 // event.setStatus(EventStatus.DRAFT); --- this is the default
@@ -94,8 +99,8 @@ class EventService implements EventApi {
                 return new MessageResponse("Event created successfully");
         }
 
-        // For validation/existence checks (public)
 
+        // For validation/existence checks (public)
         @Override
         public EventBasicInfo getPublishedEventInfo(Long id) {
                 Event event = eventRepository.findById(id)

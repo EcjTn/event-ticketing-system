@@ -154,7 +154,7 @@ public class OrderService {
     }
 
     @Transactional
-    @CacheEvict(value = "pendingOrders", key = "#orderId")
+    @CacheEvict(value = "pendingOrderDetails", key = "#orderId")
     void cancelOrderOnPaymentFailure(Long orderId) {
         Order order = orderRepository.findWithItemsForUpdateByIdAndStatus(orderId, OrderStatus.PENDING)
                 .orElseThrow(() -> new ValidationException("Order not found or already cancelled"));
@@ -168,7 +168,7 @@ public class OrderService {
     }
 
     @Transactional
-    @CacheEvict(value = "pendingOrders", key = "#orderId")
+    @CacheEvict(value = "pendingOrderDetails", key = "#orderId")
     void confirmOrderOnPaymentSucceeded(Long orderId) {
         Order order = orderRepository.findByIdForUpdate(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found"));

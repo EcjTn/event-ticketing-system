@@ -13,3 +13,4 @@ still in development.
 - Cloudinary
 - Apache Tika
 - Stripe
+- Redis

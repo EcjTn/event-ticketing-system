@@ -9,8 +9,10 @@ import com.ecjtaneo.ticket_management_backend.ticket.internal.dto.TicketValidati
 import com.ecjtaneo.ticket_management_backend.ticket.internal.model.Ticket;
 import com.ecjtaneo.ticket_management_backend.ticket.internal.model.TicketStatus;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -28,7 +30,7 @@ public class TicketService {
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket with code " + ticketValidationRequest.uniqueCode() + " not found."));
 
         if (!ticket.getEventId().equals(ticketValidationRequest.eventId())) throw new ValidationException("Ticket is not valid for this event.");
-        if(ticket.getStatus() == TicketStatus.USED || ticket.getStatus() == TicketStatus.CANCELLED) throw new ValidationException("Ticket has already been used.");
+        if(ticket.getStatus() == TicketStatus.USED || ticket.getStatus() == TicketStatus.CANCELLED) throw new ValidationException("Ticket has already been used or cancelled.");
 
         ticket.setStatus(TicketStatus.USED);
         ticketRepository.save(ticket);
@@ -36,18 +38,21 @@ public class TicketService {
         return new MessageResponse("Ticket validated successfully.");
     }
 
+    @Cacheable(value = "tickets", key = "#userId")
     List<TicketInfoResponse> getTicketsForUser(Long userId) {
         return mapper.toTicketInfoResponse(
                 ticketRepository.findTop10ByUserIdOrderByIdDesc(userId)
         );
     }
 
+    @Cacheable(value = "tickets", key = "#userId + '-' + #lastSeenId")
     List<TicketInfoResponse> getTicketsForUser(Long userId, Long lastSeenId) {
         return mapper.toTicketInfoResponse(
                 ticketRepository.findTop10ByUserIdAndIdLessThanOrderByIdDesc(userId, lastSeenId)
         );
     }
 
+    @Transactional
     void createTicketsOnOrderConfirmed(OrderConfirmedEvent event) {
         // ?::ticket_tier is used to cast the string value to the enum type in PostgreSQL.
         String sql = """

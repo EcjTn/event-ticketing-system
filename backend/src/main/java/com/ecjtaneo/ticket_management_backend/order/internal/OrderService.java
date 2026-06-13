@@ -11,6 +11,8 @@ import com.ecjtaneo.ticket_management_backend.order.internal.dto.*;
 import com.ecjtaneo.ticket_management_backend.shared.events.OrderCancelledEvent;
 import com.ecjtaneo.ticket_management_backend.shared.events.OrderConfirmedEvent;
 import com.ecjtaneo.ticket_management_backend.shared.exceptions.ResourceNotFoundException;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -152,6 +154,7 @@ public class OrderService {
     }
 
     @Transactional
+    @CacheEvict(value = "pendingOrders", key = "#orderId")
     void cancelOrderOnPaymentFailure(Long orderId) {
         Order order = orderRepository.findWithItemsForUpdateByIdAndStatus(orderId, OrderStatus.PENDING)
                 .orElseThrow(() -> new ValidationException("Order not found or already cancelled"));
@@ -165,6 +168,7 @@ public class OrderService {
     }
 
     @Transactional
+    @CacheEvict(value = "pendingOrders", key = "#orderId")
     void confirmOrderOnPaymentSucceeded(Long orderId) {
         Order order = orderRepository.findByIdForUpdate(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
@@ -189,18 +193,21 @@ public class OrderService {
 
     }
 
+    @Cacheable(value = "pendingOrders", key = "#userId")
     List<OrderBasicInfoResponse> getPendingOrdersForUser(Long userId) {
         return mapper.toOrderBasicInfoResponseDtoList(
                 orderRepository.findTop10ByUserIdAndStatusOrderByIdDesc(userId, OrderStatus.PENDING)
         );
     }
 
+    @Cacheable(value = "pendingOrders", key = "#userId + '-' + #lastSeenId")
     List<OrderBasicInfoResponse> getPendingOrdersForUser(Long userId, Long lastSeenId) {
         return mapper.toOrderBasicInfoResponseDtoList(
                 orderRepository.findTop10ByUserIdAndStatusAndIdLessThanOrderByIdDesc(userId, OrderStatus.PENDING, lastSeenId)
         );
     }
 
+    @Cacheable(value = "pendingOrderDetails", key = "#orderId")
     OrderFullInfoResponse getPendingOrderDetailsForUser(Long orderId, Long userId) {
         return mapper.toOrderFullInfoResponseDto(
                 orderRepository.findWithItemsByIdAndUserIdAndStatus(orderId, userId, OrderStatus.PENDING)

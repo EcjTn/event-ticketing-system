@@ -1,8 +1,12 @@
-import EventCard from '../components/EventCard';
-import EventList from '../components/EventList';
-import type IEvent from '../types/IEvent';
-import type IEventBasic from '../types/IEventBasic';
-import type IEventTier from '../types/IEventTier';
+import { useState } from 'react'
+
+import EventCard from '../components/EventCard'
+import EventList from '../components/EventList'
+import CreateEventModal from '../components/CreateEventModal'
+
+import type IEvent from '../types/IEvent'
+import type IEventBasic from '../types/IEventBasic'
+import type IEventTier from '../types/IEventTier'
 
 const MOCK_EVENTS: IEventBasic[] = [
     {
@@ -61,18 +65,35 @@ const MOCK_EVENT: IEvent = {
     availableTickets: 300,
 }
 
-
 function Playground() {
+    const [isModalOpen, setIsModalOpen] = useState(false)
+
     return (
         <div className="p-8 min-h-screen">
             <h1 className="text-3xl font-bold mb-8 text-mist">Component Playground</h1>
+
+            <div className="mb-12">
+                <h2 className="text-xl font-bold mb-4 text-mist">Create Event Modal Component</h2>
+                <button
+                    onClick={() => setIsModalOpen(true)}
+                    className="px-6 py-2.5 bg-mist hover:bg-mist-hover text-navy-bg font-semibold rounded-xl transition-colors cursor-pointer"
+                >
+                    Open Create Event Modal
+                </button>
+            </div>
+
             <EventList events={MOCK_EVENTS} />
 
-            <div className='mt-25'>
+            <div className="mt-12">
                 <h2 className="text-3xl font-bold mb-8 text-mist">Event Card</h2>
                 <EventCard event={MOCK_EVENT} />
             </div>
 
+            <CreateEventModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSuccess={() => alert('Event created successfully!')}
+            />
         </div>
     );
 }

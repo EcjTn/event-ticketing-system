@@ -114,5 +114,5 @@ Admins can:
 ---
 
 ## 📌 Notes
-- This is still the initial Readme
 - This project is meant as a portfolio piece to show backend architecture and problem-solving, not a production-ready ticketing platform. Stripe is running in test/sandbox mode.
+- Overengineered for project purposes.

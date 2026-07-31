@@ -2,7 +2,7 @@
 
 [![backend-ci](https://github.com/EcjTn/event-ticketing-system/actions/workflows/maven.yml/badge.svg)](https://github.com/EcjTn/event-ticketing-system/actions/workflows/maven.yml)
 
-still in development.
+**Frontend still in development**(will occasionally update frontend soon)
 
 A full-stack event ticketing platform where users can browse events, grab tickets, and pay — all backed by a modular, event-driven backend built for real-world scale problems like double-booking, race conditions, and payment safety.
 
